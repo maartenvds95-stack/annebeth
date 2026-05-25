@@ -247,6 +247,8 @@
         .item-details {
             display: flex;
             flex-direction: column;
+            flex: 1;
+            padding-right: 10px;
         }
 
         .item-title {
@@ -259,6 +261,27 @@
             font-size: 13px;
             color: var(--text-light);
             margin-top: 2px;
+        }
+
+        .item-delete-btn {
+            margin-left: auto;
+            background-color: transparent;
+            border: none;
+            color: #d1d1d6; /* Subtiel grijs */
+            font-size: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .item-delete-btn:active, .item-delete-btn:hover {
+            background-color: #fff0ee; /* Lichtroze achtergrond bij indrukken */
+            color: var(--icon-pink);
         }
 
         /* Kleur Klassen */
@@ -1193,6 +1216,9 @@
 
         // Open Pop-up
         openSleepModalBtn.addEventListener('click', () => {
+            currentEditItem = null;
+            saveBtn.innerHTML = 'Opslaan';
+            document.getElementById('deleteSleepBtn').style.display = 'none';
             sleepModal.classList.add('active');
             document.body.style.overflow = 'hidden'; // Voorkomt dat het dashboard erachter doorscrollt
             
@@ -1211,6 +1237,8 @@
         };
 
         closeSleepModalBtn.addEventListener('click', closeModal);
+        const deleteSleepBtn = document.getElementById('deleteSleepBtn');
+        if(deleteSleepBtn) deleteSleepBtn.addEventListener('click', () => handleDeleteItem(deleteSleepBtn, currentEditItem?.id, closeModal));
         
         // --- Logica voor Opslaan ---
         saveBtn.addEventListener('click', async () => {
@@ -1232,8 +1260,19 @@
             
             // Bepaal de tekst voor de subtitel
             let subtitleText = `${timeString}`;
+            
+            let oldDuration = '';
+            if (currentEditItem && currentEditItem.title === 'Slapen') {
+                const oldParts = currentEditItem.subtitle.split(' - ')[0].split(', ');
+                if (oldParts.length > 1) {
+                    oldDuration = oldParts.slice(1).join(', ');
+                }
+            }
+
             if (timerSeconds > 0) {
                 subtitleText += `, ${durationText} geslapen`;
+            } else if (oldDuration) {
+                subtitleText += `, ${oldDuration}`;
             } else {
                 subtitleText += `, handmatig ingevoerd`;
             }
@@ -1255,7 +1294,11 @@
             try {
                 saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
                 saveBtn.disabled = true;
-                await addDoc(collection(db, "timeline"), itemData);
+                if (currentEditItem && currentEditItem.title === 'Slapen') {
+                    await updateDoc(doc(db, "timeline", currentEditItem.id), itemData);
+                } else {
+                    await addDoc(collection(db, "timeline"), itemData);
+                }
                 resetTimer();
                 closeModal();
             } catch (error) {
@@ -1293,6 +1336,9 @@
 
         // Open Verschonen Pop-up
         openDiaperModalBtn.addEventListener('click', () => {
+            currentEditItem = null;
+            saveDiaperBtn.innerHTML = 'Opslaan';
+            document.getElementById('deleteDiaperBtn').style.display = 'none';
             diaperModal.classList.add('active');
             document.body.style.overflow = 'hidden';
             document.getElementById('diaperTime').value = getCurrentDateTime();
@@ -1306,6 +1352,8 @@
         };
 
         closeDiaperModalBtn.addEventListener('click', closeDiaperModal);
+        const deleteDiaperBtn = document.getElementById('deleteDiaperBtn');
+        if(deleteDiaperBtn) deleteDiaperBtn.addEventListener('click', () => handleDeleteItem(deleteDiaperBtn, currentEditItem?.id, closeDiaperModal));
         diaperModal.addEventListener('click', (e) => {
             if (e.target === diaperModal) closeDiaperModal();
         });
@@ -1353,7 +1401,11 @@
             try {
                 saveDiaperBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
                 saveDiaperBtn.disabled = true;
-                await addDoc(collection(db, "timeline"), itemData);
+                if (currentEditItem && currentEditItem.title.includes('luier')) {
+                    await updateDoc(doc(db, "timeline", currentEditItem.id), itemData);
+                } else {
+                    await addDoc(collection(db, "timeline"), itemData);
+                }
                 closeDiaperModal();
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
@@ -1418,6 +1470,9 @@
 
         // Open Borst Pop-up
         openBreastModalBtn.addEventListener('click', () => {
+            currentEditItem = null;
+            saveBreastBtn.innerHTML = 'Opslaan';
+            document.getElementById('deleteBreastBtn').style.display = 'none';
             breastModal.classList.add('active');
             document.body.style.overflow = 'hidden';
             if (!isLeftRunning && !isRightRunning && leftSeconds === 0 && rightSeconds === 0) {
@@ -1442,6 +1497,8 @@
         };
 
         closeBreastModalBtn.addEventListener('click', closeBreastModal);
+        const deleteBreastBtn = document.getElementById('deleteBreastBtn');
+        if(deleteBreastBtn) deleteBreastBtn.addEventListener('click', () => handleDeleteItem(deleteBreastBtn, currentEditItem?.id, closeBreastModal));
         breastModal.addEventListener('click', (e) => {
             if (e.target === breastModal) closeBreastModal();
         });
@@ -1458,11 +1515,17 @@
             const timeString = format24Hour(timeObj);
 
             // Bereken de tekst voor de subtitel
+            let oldDuration = '';
+            if (currentEditItem && currentEditItem.title === 'Borstvoeding') {
+                const oldParts = currentEditItem.subtitle.split(', ');
+                if (oldParts.length > 1) oldDuration = oldParts.slice(1).join(', ');
+            }
+
             let sideText = [];
             if (leftSeconds > 0) sideText.push(`L: ${Math.max(1, Math.round(leftSeconds/60))}m`);
             if (rightSeconds > 0) sideText.push(`R: ${Math.max(1, Math.round(rightSeconds/60))}m`);
             
-            let durationText = sideText.length > 0 ? sideText.join(', ') : 'handmatig';
+            let durationText = sideText.length > 0 ? sideText.join(', ') : (oldDuration || 'handmatig');
             const subtitleText = `${timeString}, ${durationText}`;
 
             const itemTimestamp = timeObj.toISOString();
@@ -1479,7 +1542,11 @@
             try {
                 saveBreastBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
                 saveBreastBtn.disabled = true;
-                await addDoc(collection(db, "timeline"), itemData);
+                if (currentEditItem && currentEditItem.title === 'Borstvoeding') {
+                    await updateDoc(doc(db, "timeline", currentEditItem.id), itemData);
+                } else {
+                    await addDoc(collection(db, "timeline"), itemData);
+                }
                 resetBreastTimers();
                 closeBreastModal();
             } catch (error) {
@@ -1513,6 +1580,9 @@
 
         // Open Fles Pop-up
         openBottleModalBtn.addEventListener('click', () => {
+            currentEditItem = null;
+            saveBottleBtn.innerHTML = 'Opslaan';
+            document.getElementById('deleteBottleBtn').style.display = 'none';
             bottleModal.classList.add('active');
             document.body.style.overflow = 'hidden';
             document.getElementById('bottleTime').value = getCurrentDateTime();
@@ -1527,6 +1597,8 @@
         };
 
         closeBottleModalBtn.addEventListener('click', closeBottleModal);
+        const deleteBottleBtn = document.getElementById('deleteBottleBtn');
+        if(deleteBottleBtn) deleteBottleBtn.addEventListener('click', () => handleDeleteItem(deleteBottleBtn, currentEditItem?.id, closeBottleModal));
         bottleModal.addEventListener('click', (e) => { if (e.target === bottleModal) closeBottleModal(); });
 
         // Opslaan Flesvoeding
@@ -1555,7 +1627,11 @@
             try {
                 saveBottleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
                 saveBottleBtn.disabled = true;
-                await addDoc(collection(db, "timeline"), itemData);
+                if (currentEditItem && currentEditItem.title === 'Fles') {
+                    await updateDoc(doc(db, "timeline", currentEditItem.id), itemData);
+                } else {
+                    await addDoc(collection(db, "timeline"), itemData);
+                }
                 closeBottleModal();
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
@@ -1620,6 +1696,9 @@
 
         // Open Kolven Pop-up
         openPumpModalBtn.addEventListener('click', () => {
+            currentEditItem = null;
+            savePumpBtn.innerHTML = 'Opslaan';
+            document.getElementById('deletePumpBtn').style.display = 'none';
             pumpModal.classList.add('active');
             document.body.style.overflow = 'hidden';
             if (!isPumpLeftRunning && !isPumpRightRunning && pumpLeftSeconds === 0 && pumpRightSeconds === 0) {
@@ -1645,6 +1724,8 @@
         };
 
         closePumpModalBtn.addEventListener('click', closePumpModal);
+        const deletePumpBtn = document.getElementById('deletePumpBtn');
+        if(deletePumpBtn) deletePumpBtn.addEventListener('click', () => handleDeleteItem(deletePumpBtn, currentEditItem?.id, closePumpModal));
         pumpModal.addEventListener('click', (e) => { if (e.target === pumpModal) closePumpModal(); });
 
         // Opslaan Kolven
@@ -1660,22 +1741,32 @@
             const timeString = format24Hour(timeObj);
 
             // Bereken de tekst voor de subtitel
+            let oldDuration = '';
+            if (currentEditItem && currentEditItem.title === 'Kolven') {
+                const oldParts = currentEditItem.subtitle.split(', ');
+                if (oldParts.length > 1) oldDuration = oldParts.slice(1).join(', ').replace(/, \d+\s*ml/, '');
+            }
+
             let sideText = [];
             if (pumpLeftSeconds > 0) sideText.push(`L: ${Math.max(1, Math.round(pumpLeftSeconds/60))}m`);
             if (pumpRightSeconds > 0) sideText.push(`R: ${Math.max(1, Math.round(pumpRightSeconds/60))}m`);
             
-            let durationText = sideText.length > 0 ? sideText.join(', ') : 'handmatig';
+            let durationText = sideText.length > 0 ? sideText.join(', ') : (oldDuration || 'handmatig');
             if (amountVal) durationText += `, ${amountVal} ml`;
             
             const subtitleText = `${timeString}, ${durationText}`;
             const itemTimestamp = timeObj.toISOString();
 
-            const itemData = { title: 'Kolven', subtitle: subtitleText, icon: 'fa-pump-medical', colorClass: 'c-pink', bgStyle: 'background-color: #ffebe6;', timestamp: itemTimestamp };
+            const itemData = { title: 'Kolven', subtitle: subtitleText, icon: 'fa-pump-medical', colorClass: 'c-pink', bgStyle: 'background-color: #ffebe6;', timestamp: itemTimestamp, addedBy: getUserName() };
 
             try {
                 savePumpBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
                 savePumpBtn.disabled = true;
-                await addDoc(collection(db, "timeline"), itemData);
+                if (currentEditItem && currentEditItem.title === 'Kolven') {
+                    await updateDoc(doc(db, "timeline", currentEditItem.id), itemData);
+                } else {
+                    await addDoc(collection(db, "timeline"), itemData);
+                }
                 resetPumpTimers();
                 closePumpModal();
             } catch (error) {
@@ -1684,6 +1775,88 @@
             } finally {
                 savePumpBtn.innerHTML = "Opslaan";
                 savePumpBtn.disabled = false;
+            }
+        });
+
+        // ==========================================
+        // --- LOGICA VOOR NOTITIE POP-UP ---
+        // ==========================================
+        let currentEditNoteId = null;
+
+        const openNoteModalBtn = document.getElementById('openNoteModalBtn');
+        const closeNoteModalBtn = document.getElementById('closeNoteModalBtn');
+        const noteModal = document.getElementById('noteModal');
+        const saveNoteBtn = document.getElementById('saveNoteBtn');
+        const deleteNoteBtn = document.getElementById('deleteNoteBtn');
+
+        openNoteModalBtn.addEventListener('click', () => {
+            currentEditNoteId = null;
+            saveNoteBtn.innerHTML = 'Opslaan';
+            deleteNoteBtn.style.display = 'none'; // Verberg verwijder knop
+            noteModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('noteTime').value = getCurrentDateTime();
+            document.getElementById('noteText').value = '';
+        });
+
+        const closeNoteModal = () => {
+            noteModal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        closeNoteModalBtn.addEventListener('click', closeNoteModal);
+        noteModal.addEventListener('click', (e) => { if (e.target === noteModal) closeNoteModal(); });
+
+        // Verwijder Notitie via Pop-up
+        deleteNoteBtn.addEventListener('click', async () => {
+            if (currentEditNoteId && confirm('Weet je zeker dat je deze notitie wilt verwijderen?')) {
+                try {
+                    deleteNoteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                    deleteNoteBtn.disabled = true;
+                    await deleteDoc(doc(db, "timeline", currentEditNoteId));
+                    closeNoteModal();
+                } catch (error) {
+                    console.error("Fout bij verwijderen:", error);
+                    alert("Verwijderen mislukt! Controleer je verbinding en rechten.");
+                } finally {
+                    deleteNoteBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Verwijderen';
+                    deleteNoteBtn.disabled = false;
+                }
+            }
+        });
+
+        saveNoteBtn.addEventListener('click', async () => {
+            const timeVal = document.getElementById('noteTime').value;
+            const textVal = document.getElementById('noteText').value.trim();
+            
+            let timeObj = new Date();
+            if (timeVal) {
+                const parsedDate = new Date(timeVal);
+                if (!isNaN(parsedDate.getTime())) timeObj = parsedDate;
+            }
+            const timeString = format24Hour(timeObj);
+
+            const subtitleText = `${timeString} - ${textVal || 'Geen tekst'}`;
+            const itemTimestamp = timeObj.toISOString();
+
+            const itemData = { title: 'Notitie', subtitle: subtitleText, icon: 'fa-note-sticky', colorClass: 'c-orange', bgStyle: 'background-color: #fff3e0;', timestamp: itemTimestamp };
+
+            try {
+                saveNoteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
+                saveNoteBtn.disabled = true;
+                if (currentEditNoteId) {
+                    await updateDoc(doc(db, "timeline", currentEditNoteId), itemData);
+                } else {
+                    await addDoc(collection(db, "timeline"), itemData);
+                }
+                
+                closeNoteModal();
+            } catch (error) {
+                console.error("Fout bij opslaan:", error);
+                alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            } finally {
+                saveNoteBtn.innerHTML = "Opslaan";
+                saveNoteBtn.disabled = false;
             }
         });
 
@@ -1697,6 +1870,8 @@
         const displayLength = document.getElementById('displayLength');
         const displayWeight = document.getElementById('displayWeight');
         const growthHistoryList = document.getElementById('growthHistoryList');
+
+        let currentEditGrowthId = null;
 
         function renderGrowthData() {
             // Sorteer nieuwste bovenaan
@@ -1726,6 +1901,7 @@
                         <span style="color: var(--text-light);"><i class="fa-regular fa-calendar" style="margin-right: 4px;"></i> ${dateString}</span>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-weight: 600; color: #ff8a66;">${vals.join(' • ')}</span>
+                            <i class="fa-solid fa-pen edit-growth-btn" data-index="${index}" style="color: var(--icon-yellow); cursor: pointer; padding: 4px;"></i>
                             <i class="fa-solid fa-trash-can delete-growth-btn" data-index="${index}" style="color: var(--icon-pink); cursor: pointer; padding: 4px;"></i>
                         </div>
                     </div>
@@ -1733,7 +1909,7 @@
             });
         }
 
-        // Verwijder knop functionaliteit in geschiedenis
+        // Bewerk en Verwijder knop functionaliteit in geschiedenis
         growthHistoryList.addEventListener('click', async (e) => {
             if (e.target.classList.contains('delete-growth-btn')) {
                 const index = e.target.getAttribute('data-index');
@@ -1781,11 +1957,19 @@
             try {
                 saveGrowthBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
                 saveGrowthBtn.disabled = true;
-                await addDoc(collection(db, "growth"), {
+
+                const growthDataObj = {
                     timestamp: timeObj.toISOString(),
                     length: lenVal ? lenVal.replace('.', ',') : null,
                     weight: wgtVal ? wgtVal.replace('.', ',') : null
-                });
+                };
+
+                if (currentEditGrowthId) {
+                    await updateDoc(doc(db, "growth", currentEditGrowthId), growthDataObj);
+                } else {
+                    await addDoc(collection(db, "growth"), growthDataObj);
+                }
+                
                 closeGrowthModal();
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
