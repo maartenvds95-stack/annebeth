@@ -328,7 +328,7 @@
         .modal-header {
             display: flex;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
             border-bottom: 1px solid #f0f0f5;
             position: sticky;
             top: 0;
@@ -366,7 +366,7 @@
         }
 
         .modal-content {
-            padding: 20px;
+            padding: 16px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -377,7 +377,7 @@
             background-color: #f4f2ff;
             border-radius: 30px;
             padding: 4px;
-            margin-bottom: 30px;
+            margin-bottom: 16px;
         }
 
         .segment-btn {
@@ -399,7 +399,7 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .input-label {
@@ -416,7 +416,7 @@
             background-color: #f4f2ff;
             border: 1px solid #dcd8ff;
             border-radius: 15px;
-            padding: 14px 15px;
+            padding: 12px 15px;
             font-size: 16px;
             color: var(--icon-purple);
             outline: none;
@@ -425,7 +425,7 @@
         }
 
         textarea.input-field {
-            min-height: 100px;
+            min-height: 70px;
             resize: none;
             color: var(--text-dark);
             font-weight: normal;
@@ -433,7 +433,7 @@
 
         .timer-section {
             text-align: center;
-            margin: 30px 0;
+            margin: 16px 0;
         }
 
         .timer-display {
@@ -460,11 +460,11 @@
         .photo-btn-container {
             text-align: center;
             margin-top: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 16px;
         }
 
         .modal-footer {
-            padding: 20px;
+            padding: 16px;
             margin-top: auto;
         }
 
@@ -473,7 +473,7 @@
             background-color: var(--icon-purple);
             color: #ffffff;
             border: none;
-            padding: 18px;
+            padding: 14px;
             border-radius: 30px;
             font-size: 18px;
             font-weight: 600;
@@ -594,12 +594,12 @@
 
             <div class="input-group">
                 <label class="input-label">Start</label>
-                <input type="datetime-local" class="input-field" id="sleepStart">
+                <input type="datetime-local" class="input-field" id="sleepStart" lang="nl">
             </div>
 
             <div class="input-group">
                 <label class="input-label">Einde</label>
-                <input type="datetime-local" class="input-field" id="sleepEnd">
+                <input type="datetime-local" class="input-field" id="sleepEnd" lang="nl">
             </div>
 
             <div class="timer-section">
@@ -640,7 +640,7 @@
 
             <div class="input-group">
                 <label class="input-label">Tijd van verschonen</label>
-                <input type="datetime-local" class="input-field" id="diaperTime" style="background-color: #fcefd0; border-color: #fcefd0; color: var(--text-dark);">
+                <input type="datetime-local" class="input-field" id="diaperTime" lang="nl" style="background-color: #fcefd0; border-color: #fcefd0; color: var(--text-dark);">
             </div>
 
             <div class="input-group">
@@ -668,10 +668,10 @@
         <div class="modal-content">
             <div class="input-group">
                 <label class="input-label">Starttijd</label>
-                <input type="datetime-local" class="input-field" id="breastTime" style="background-color: #d1f0d9; border-color: #d1f0d9; color: var(--text-dark);">
+                <input type="datetime-local" class="input-field" id="breastTime" lang="nl" style="background-color: #d1f0d9; border-color: #d1f0d9; color: var(--text-dark);">
             </div>
 
-            <div style="display: flex; gap: 15px; margin: 20px 0;">
+            <div style="display: flex; gap: 15px; margin: 12px 0;">
                 <div class="timer-section" style="flex: 1; margin: 0; padding: 15px; background-color: #fafffb; border-radius: 16px; border: 2px solid #d1f0d9;">
                     <div style="font-size: 14px; color: var(--text-light); margin-bottom: 5px; font-weight: 500;">Links</div>
                     <div class="timer-display" id="leftTimerDisplay" style="font-size: 32px; margin-bottom: 10px; color: var(--icon-green);">00:00</div>
@@ -714,7 +714,7 @@
 
             <div class="input-group">
                 <label class="input-label">Tijd</label>
-                <input type="datetime-local" class="input-field" id="bottleTime" style="background-color: #e6f2ff; border-color: #e6f2ff; color: var(--text-dark);">
+                <input type="datetime-local" class="input-field" id="bottleTime" lang="nl" style="background-color: #e6f2ff; border-color: #e6f2ff; color: var(--text-dark);">
             </div>
 
             <div class="input-group">
@@ -747,10 +747,10 @@
         <div class="modal-content">
             <div class="input-group">
                 <label class="input-label">Starttijd</label>
-                <input type="datetime-local" class="input-field" id="pumpTime" style="background-color: #ffebe6; border-color: #ffebe6; color: var(--text-dark);">
+                <input type="datetime-local" class="input-field" id="pumpTime" lang="nl" style="background-color: #ffebe6; border-color: #ffebe6; color: var(--text-dark);">
             </div>
 
-            <div style="display: flex; gap: 15px; margin: 20px 0;">
+            <div style="display: flex; gap: 15px; margin: 12px 0;">
                 <div class="timer-section" style="flex: 1; margin: 0; padding: 15px; background-color: #fffaf9; border-radius: 16px; border: 2px solid #ffebe6;">
                     <div style="font-size: 14px; color: var(--text-light); margin-bottom: 5px; font-weight: 500;">Links</div>
                     <div class="timer-display" id="pumpLeftTimerDisplay" style="font-size: 32px; margin-bottom: 10px; color: var(--icon-pink);">00:00</div>
@@ -793,10 +793,10 @@
         <div class="modal-content">
             <div class="input-group">
                 <label class="input-label">Datum</label>
-                <input type="datetime-local" class="input-field" id="growthTime" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
+                <input type="datetime-local" class="input-field" id="growthTime" lang="nl" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
             </div>
 
-            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 15px; margin-bottom: 12px;">
                 <div class="input-group" style="flex: 1; margin-bottom: 0;">
                     <label class="input-label">Lengte (cm)</label>
                     <input type="number" step="0.1" class="input-field" id="growthLength" placeholder="Bijv. 55" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
@@ -822,6 +822,27 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- Helper functies voor Nederlandse datums (gegarandeerd Nederlands) ---
+        function getDutchDateLong(dateObj) {
+            const maanden = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+            return `${dateObj.getDate()} ${maanden[dateObj.getMonth()]}`;
+        }
+        
+        function getDutchDateShort(dateObj) {
+            const maanden = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+            return `${dateObj.getDate()} ${maanden[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+        }
+
+        function isVandaagOfGisteren(dateObj) {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (dateObj.toDateString() === today.toDateString()) return 'Vandaag';
+            if (dateObj.toDateString() === yesterday.toDateString()) return 'Gisteren';
+            return getDutchDateLong(dateObj);
+        }
+
         // ==========================================
         // --- LOGICA VOOR INLOGGEN ---
         // ==========================================
@@ -884,34 +905,57 @@
         const sleepModal = document.getElementById('sleepModal');
         const saveBtn = document.getElementById('saveBtn');
 
-        // --- Zet de datum van vandaag in de tijdlijn ---
-        const todayElement = document.getElementById('todayTimelineDate');
-        if (todayElement) {
-            const today = new Date();
-            todayElement.textContent = today.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
-        }
-
-        // --- LocalStorage laden ---
+        // --- LocalStorage laden & Tijdlijn netjes opbouwen en groeperen ---
         function loadTimelineItems() {
-            // Haal items op uit LocalStorage (of maak een lege lijst als er niks is)
             const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
             const timeline = document.querySelector('.timeline');
-            const firstHeader = timeline.querySelector('.timeline-header');
             
-            if (firstHeader) {
-                savedItems.forEach(item => {
-                    const newItem = document.createElement('div');
-                    newItem.className = 'timeline-item';
-                    newItem.innerHTML = `
-                        <div class="item-icon-wrapper ${item.colorClass}" style="${item.bgStyle}"><i class="fa-solid ${item.icon}"></i></div>
-                        <div class="item-details">
-                            <span class="item-title">${item.title}</span>
-                            <span class="item-subtitle">${item.subtitle}</span>
-                        </div>
-                    `;
-                    firstHeader.insertAdjacentElement('afterend', newItem);
-                });
+            // Bewaar de HTML voor de dagboek link
+            const dagboekLinkHtml = '<a href="#" class="timeline-link">Dagboek &gt;</a>';
+            timeline.innerHTML = ''; 
+
+            if (savedItems.length === 0) {
+                timeline.innerHTML = `
+                    <div class="timeline-header">
+                        <span class="timeline-date">Vandaag</span>
+                        ${dagboekLinkHtml}
+                    </div>
+                `;
+                return;
             }
+
+            // Sorteer op tijdstip (nieuwste bovenaan)
+            savedItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            let currentGroupDate = null;
+
+            savedItems.forEach((item, index) => {
+                const itemDate = new Date(item.timestamp);
+                const dateGroup = isVandaagOfGisteren(itemDate);
+
+                if (dateGroup !== currentGroupDate) {
+                    currentGroupDate = dateGroup;
+                    const header = document.createElement('div');
+                    header.className = 'timeline-header';
+                    if (index === 0) {
+                        header.innerHTML = `<span class="timeline-date">${dateGroup}</span>${dagboekLinkHtml}`;
+                    } else {
+                        header.innerHTML = `<span class="timeline-date">${dateGroup}</span><span style="flex: 1;"></span>`;
+                    }
+                    timeline.appendChild(header);
+                }
+
+                const newItem = document.createElement('div');
+                newItem.className = 'timeline-item';
+                newItem.innerHTML = `
+                    <div class="item-icon-wrapper ${item.colorClass}" style="${item.bgStyle}"><i class="fa-solid ${item.icon}"></i></div>
+                    <div class="item-details">
+                        <span class="item-title">${item.title}</span>
+                        <span class="item-subtitle">${item.subtitle}</span>
+                    </div>
+                `;
+                timeline.appendChild(newItem);
+            });
         }
         
         // Laad opgeslagen items direct bij het openen van de app
@@ -1077,25 +1121,7 @@
             savedItems.push(itemData);
             localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
 
-            // Maak een nieuw HTML element voor de tijdlijn
-            const newItem = document.createElement('div');
-            newItem.className = 'timeline-item';
-            newItem.innerHTML = `
-                <div class="item-icon-wrapper c-purple" style="background-color: #f1e6f7;"><i class="fa-solid fa-bed"></i></div>
-                <div class="item-details">
-                    <span class="item-title">${sleepTitle}</span>
-                    <span class="item-subtitle">${subtitleText}</span>
-                </div>
-            `;
-            
-            // Voeg het nieuwe element toe bovenaan de tijdlijn (onder de eerste datum header)
-            const timeline = document.querySelector('.timeline');
-            const firstHeader = timeline.querySelector('.timeline-header');
-            if (firstHeader) {
-                firstHeader.insertAdjacentElement('afterend', newItem);
-            }
-            
-            // Reset de timer nu we succesvol hebben opgeslagen
+            loadTimelineItems(); // Update het hele schema in één keer
             resetTimer();
             updateActionTimes(); // Tijd updaten in startscherm
             // Sluit het scherm
@@ -1181,20 +1207,7 @@
             savedItems.push(itemData);
             localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
 
-            // Toevoegen aan de HTML
-            const newItem = document.createElement('div');
-            newItem.className = 'timeline-item';
-            newItem.innerHTML = `
-                <div class="item-icon-wrapper ${itemData.colorClass}" style="${itemData.bgStyle}"><i class="fa-solid ${itemData.icon}"></i></div>
-                <div class="item-details">
-                    <span class="item-title">${itemData.title}</span>
-                    <span class="item-subtitle">${itemData.subtitle}</span>
-                </div>
-            `;
-            const timeline = document.querySelector('.timeline');
-            const firstHeader = timeline.querySelector('.timeline-header');
-            if (firstHeader) firstHeader.insertAdjacentElement('afterend', newItem);
-
+            loadTimelineItems();
             updateActionTimes(); // Tijd updaten in startscherm
             closeDiaperModal();
         });
@@ -1310,9 +1323,7 @@
             savedItems.push(itemData);
             localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
 
-            loadTimelineItems();
-            loadTimelineItems();
-            loadTimelineItems();
+            loadTimelineItems(); // 1 keer laden in plaats van 3
 
             resetBreastTimers();
             updateActionTimes(); // Tijd updaten in startscherm
@@ -1538,7 +1549,7 @@
             growthHistoryList.innerHTML = '';
             growthData.forEach((entry, index) => {
                 const d = new Date(entry.timestamp);
-                const dateString = d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+                const dateString = getDutchDateShort(d);
                 let vals = [];
                 if (entry.length) vals.push(entry.length + ' cm');
                 if (entry.weight) vals.push(entry.weight + ' kg');
