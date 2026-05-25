@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f7f5ef">
+    <title>Baby Tracker UI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f7f5ef;
+            --card-bg: #ffffff;
+            --text-dark: #333333;
+            --text-light: #999999;
+            --icon-purple: #7b52de;
+            --icon-green: #34c759;
+            --icon-yellow: #ffb340;
+            --icon-pink: #ff8a80;
+            --icon-blue: #4da6ff;
+            --primary-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--primary-font);
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            -webkit-touch-callout: none;
+            -ms-touch-action: manipulation;
+            touch-action: manipulation;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px; /* Mobiel formaat */
+            background-color: var(--bg-color);
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            margin: 12px;
+            border-radius: 18px;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* (status bar removed) */
+
+        /* Bovenste Profiel Sectie */
+        .profile-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 20px 30px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #f0e6d8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            color: #ffb38a;
+            font-size: 20px;
+            background-color: transparent;
+        }
+
+        /* Grotere tap-target voor knoppen */
+        .plus-btn {
+            position: absolute;
+            bottom: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 36px;
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .stat-item.clickable {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .stat-item.clickable:active {
+            opacity: 0.6;
+        }
+
+        /* Middelste Baby Profiel */
+        .profile-center {
+            transform: translateY(-10px);
+        }
+
+        .profile-center .stat-circle {
+            width: 80px;
+            height: 80px;
+            background-color: #f2e3d5;
+            border: none;
+            font-size: 40px;
+            color: #ff8a66;
+            position: relative;
+        }
+
+        .profile-center .stat-circle::after {
+            content: "\f0c2"; /* Wokje als detail */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 0;
+            right: -5px;
+            color: white;
+            font-size: 20px;
+        }
+
+        .profile-center .stat-value {
+            font-size: 20px;
+        }
+
+        /* Actie Knoppen Rij */
+        .action-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 18px;
+        }
+
+        .action-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px 10px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+            min-width: 0;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .action-icon {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .action-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .action-time {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        .plus-btn {
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Tijdlijn Sectie */
+        .timeline {
+            padding: 10px 20px 80px 20px;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .timeline-date {
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--text-dark);
+            flex: 1;
+            text-align: center;
+            padding-left: 60px; /* Om het in het midden te forceren naast de link */
+        }
+
+        .timeline-link {
+            font-size: 14px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .timeline-item {
+            background-color: var(--card-bg);
+            border-radius: 30px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .item-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+
+        .item-subtitle {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        /* Kleur Klassen */
+        .c-purple { color: var(--icon-purple); }
+        .c-green { color: var(--icon-green); }
+        .c-yellow { color: var(--icon-yellow); }
+        .c-pink { color: var(--icon-pink); }
+        .c-blue { color: var(--icon-blue); }
+        .bg-green-light { background-color: #d1f0d9; color: var(--icon-green); }
+        .bg-yellow-light { background-color: #fcefd0; color: var(--icon-yellow); }
+
+        /* Kleine schermen: zorg dat content goed schaalt */
+        @media (max-width: 360px) {
+            .profile-section { padding: 16px 18px; }
+            .status-bar { padding: 12px 16px; }
+            .stat-circle { width: 44px; height: 44px; }
+            .profile-center .stat-circle { width: 70px; height: 70px; font-size: 34px; }
+        }
+
+        /* --- Modal / Pop-up Styling --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-radius: 24px 24px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f5;
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            z-index: 2;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f5f5f5;
+            border: none;
+            font-size: 24px;
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .page-title {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--icon-purple);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-right: 40px;
+        }
+
+        .modal-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .segmented-control {
+            display: flex;
+            background-color: #f4f2ff;
+            border-radius: 30px;
+            padding: 4px;
+            margin-bottom: 30px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            background: transparent;
+            border-radius: 26px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--icon-purple);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .segment-btn.active {
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            font-weight: 500;
+            padding-left: 5px;
+        }
+
+        .input-field {
+            width: 100%;
+            background-color: #f4f2ff;
+            border: 1px solid #dcd8ff;
+            border-radius: 15px;
+            padding: 14px 15px;
+            font-size: 16px;
+            color: var(--icon-purple);
+            outline: none;
+            font-weight: 500;
+            box-sizing: border-box;
+        }
+
+        textarea.input-field {
+            min-height: 100px;
+            resize: none;
+            color: var(--text-dark);
+            font-weight: normal;
+        }
+
+        .timer-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 300;
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .sleep-action-btn, .photo-btn {
+            background-color: #e5e0ff;
+            color: var(--icon-purple);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .photo-btn-container {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .save-btn {
+            width: 100%;
+            background-color: var(--icon-purple);
+            color: #ffffff;
+            border: none;
+            padding: 18px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(123, 82, 222, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Inlogscherm -->
+<div class="app-container" id="loginScreen">
+    <div style="text-align: center; padding: 40px 20px 20px 20px;">
+        <div class="stat-circle" style="margin: 0 auto 20px auto; width: 70px; height: 70px; font-size: 35px; background-color: #f2e3d5; border: none; color: #ff8a66;">
+            <i class="fa-solid fa-baby"></i>
+        </div>
+        <h1 style="color: var(--icon-purple); margin: 0 0 10px 0; font-size: 24px;">Baby Tracker</h1>
+        <p style="color: var(--text-light); margin: 0; font-size: 14px;">Log in om het dagboek te openen</p>
+    </div>
+
+    <div style="padding: 20px;">
+        <div class="input-group">
+            <label class="input-label">Gebruikersnaam</label>
+            <input type="text" class="input-field" id="loginUsername" placeholder="Bijv. mama of papa" style="background-color: var(--card-bg); border-color: #e5e5ea;">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Wachtwoord</label>
+            <input type="password" class="input-field" id="loginPassword" placeholder="Je wachtwoord" style="background-color: var(--card-bg); border-color: #e5e5ea;">
+        </div>
+
+        <div style="margin-top: 40px;">
+            <button class="save-btn" id="loginBtn">Inloggen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hoofd App (Verstopt totdat je bent ingelogd) -->
+<div class="app-container" id="mainApp" style="display: none;">
+    
+
+    <div class="profile-section">
+        <div class="stat-item clickable" id="openGrowthModalBtn1">
+            <div class="stat-circle"><i class="fa-solid fa-chart-column"></i></div>
+            <div class="stat-value" id="displayLength">54 cm</div>
+            <div class="stat-label">Lengte</div>
+        </div>
+        
+        <div class="stat-item profile-center">
+            <div class="stat-circle"><i class="fa-solid fa-baby"></i></div>
+            <div class="stat-value">Annebeth</div>
+            <div class="stat-label" id="babyAge">Aan het berekenen...</div>
+        </div>
+
+        <div class="stat-item clickable" id="openGrowthModalBtn2">
+            <div class="stat-circle"><i class="fa-solid fa-weight-scale"></i></div>
+            <div class="stat-value" id="displayWeight">4,41 kg</div>
+            <div class="stat-label">Gewicht</div>
+        </div>
+    </div>
+
+    <div class="action-row">
+        <div class="action-card">
+            <div class="action-icon c-purple"><i class="fa-solid fa-bed"></i></div>
+            <div class="action-title">Slapen</div>
+            <div class="action-time" id="sleepLastTime">Lang geleden</div>
+            <div class="plus-btn c-purple" id="openSleepModalBtn"><i class="fa-solid fa-plus"></i></div>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon c-green"><i class="fa-solid fa-person-breastfeeding"></i></div>
+            <div class="action-title">Borst</div>
+            <div class="action-time" id="breastLastTime">Lang geleden</div>
+            <div class="plus-btn c-green" id="openBreastModalBtn"><i class="fa-solid fa-plus"></i></div>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon c-yellow"><i class="fa-solid fa-baby"></i></div>
+            <div class="action-title">Verschonen</div>
+            <div class="action-time" id="diaperLastTime">Lang geleden</div>
+            <div class="plus-btn c-yellow" id="openDiaperModalBtn"><i class="fa-solid fa-plus"></i></div>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon c-blue"><i class="fa-solid fa-bottle-droplet"></i></div>
+            <div class="action-title">Fles</div>
+            <div class="action-time" id="bottleLastTime">Lang geleden</div>
+            <div class="plus-btn c-blue" id="openBottleModalBtn"><i class="fa-solid fa-plus"></i></div>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon c-pink"><i class="fa-solid fa-pump-medical"></i></div>
+            <div class="action-title">Kolven</div>
+            <div class="action-time" id="pumpLastTime">Lang geleden</div>
+            <div class="plus-btn c-pink" id="openPumpModalBtn"><i class="fa-solid fa-plus"></i></div>
+        </div>
+    </div>
+
+    <div class="timeline">
+        <div class="timeline-header">
+            <span class="timeline-date" id="todayTimelineDate">18 mei</span>
+            <a href="#" class="timeline-link">Dagboek &gt;</a>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up overlay die over het scherm valt -->
+<div class="modal-overlay" id="sleepModal">
+    <div class="modal-container" id="modalContent">
+        <div class="modal-header">
+            <button class="back-btn" id="closeModalBtn">&times;</button>
+            <div class="page-title">
+                <i class="fa-solid fa-bed"></i> Slapen
+            </div>
+        </div>
+
+        <div class="modal-content">
+
+            <div class="input-group">
+                <label class="input-label">Start</label>
+                <input type="datetime-local" class="input-field" id="sleepStart">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Einde</label>
+                <input type="datetime-local" class="input-field" id="sleepEnd">
+            </div>
+
+            <div class="timer-section">
+                <div class="timer-display">00:00:00</div>
+                <button class="sleep-action-btn">
+                    <i class="fa-solid fa-stopwatch"></i> In slaap gevallen
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Opmerkingen</label>
+                <textarea class="input-field" placeholder="Uw opmerkingen"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="save-btn" id="saveBtn">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up overlay voor Verschonen -->
+<div class="modal-overlay" id="diaperModal">
+    <div class="modal-container" id="diaperModalContent">
+        <div class="modal-header">
+            <button class="back-btn" id="closeDiaperModalBtn">&times;</button>
+            <div class="page-title" style="color: var(--icon-yellow);">
+                    <i class="fa-solid fa-baby"></i> Verschonen
+            </div>
+        </div>
+
+        <div class="modal-content">
+            <div class="segmented-control" id="diaperTypeControl" style="background-color: #fcefd0;">
+                <button class="segment-btn active" style="color: var(--icon-yellow);"><i class="fa-solid fa-droplet"></i> Plas</button>
+                <button class="segment-btn" style="color: var(--icon-yellow);"><i class="fa-solid fa-poop"></i> Poep</button>
+                <button class="segment-btn" style="color: var(--icon-yellow);"><i class="fa-solid fa-asterisk"></i> Beide</button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Tijd van verschonen</label>
+                <input type="datetime-local" class="input-field" id="diaperTime" style="background-color: #fcefd0; border-color: #fcefd0; color: var(--text-dark);">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Opmerkingen</label>
+                <textarea class="input-field" id="diaperNotes" placeholder="Bijv. uitslag, kleur, etc." style="background-color: #fcefd0; border-color: #fcefd0; color: var(--text-dark);"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="save-btn" id="saveDiaperBtn" style="background-color: var(--icon-yellow); color: #333; box-shadow: 0 4px 15px rgba(255, 179, 64, 0.3);">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up overlay voor Borst (Voeden) -->
+<div class="modal-overlay" id="breastModal">
+    <div class="modal-container" id="breastModalContent">
+        <div class="modal-header">
+            <button class="back-btn" id="closeBreastModalBtn">&times;</button>
+            <div class="page-title" style="color: var(--icon-green);">
+                <i class="fa-solid fa-person-breastfeeding"></i> Borstvoeding
+            </div>
+        </div>
+
+        <div class="modal-content">
+            <div class="input-group">
+                <label class="input-label">Starttijd</label>
+                <input type="datetime-local" class="input-field" id="breastTime" style="background-color: #d1f0d9; border-color: #d1f0d9; color: var(--text-dark);">
+            </div>
+
+            <div style="display: flex; gap: 15px; margin: 20px 0;">
+                <div class="timer-section" style="flex: 1; margin: 0; padding: 15px; background-color: #fafffb; border-radius: 16px; border: 2px solid #d1f0d9;">
+                    <div style="font-size: 14px; color: var(--text-light); margin-bottom: 5px; font-weight: 500;">Links</div>
+                    <div class="timer-display" id="leftTimerDisplay" style="font-size: 32px; margin-bottom: 10px; color: var(--icon-green);">00:00</div>
+                    <button class="sleep-action-btn" id="leftTimerBtn" style="background-color: #d1f0d9; color: var(--icon-green); width: 100%; justify-content: center; font-size: 13px;">
+                        <i class="fa-solid fa-play"></i> Start
+                    </button>
+                </div>
+
+                <div class="timer-section" style="flex: 1; margin: 0; padding: 15px; background-color: #fafffb; border-radius: 16px; border: 2px solid #d1f0d9;">
+                    <div style="font-size: 14px; color: var(--text-light); margin-bottom: 5px; font-weight: 500;">Rechts</div>
+                    <div class="timer-display" id="rightTimerDisplay" style="font-size: 32px; margin-bottom: 10px; color: var(--icon-green);">00:00</div>
+                    <button class="sleep-action-btn" id="rightTimerBtn" style="background-color: #d1f0d9; color: var(--icon-green); width: 100%; justify-content: center; font-size: 13px;">
+                        <i class="fa-solid fa-play"></i> Start
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="save-btn" id="saveBreastBtn" style="background-color: var(--icon-green); color: #fff; box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3);">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up overlay voor Flesvoeding -->
+<div class="modal-overlay" id="bottleModal">
+    <div class="modal-container" id="bottleModalContent">
+        <div class="modal-header">
+            <button class="back-btn" id="closeBottleModalBtn">&times;</button>
+            <div class="page-title" style="color: var(--icon-blue);">
+                <i class="fa-solid fa-bottle-droplet"></i> Flesvoeding
+            </div>
+        </div>
+
+        <div class="modal-content">
+            <div class="segmented-control" id="bottleTypeControl" style="background-color: #e6f2ff;">
+                <button class="segment-btn active" style="color: var(--icon-blue);">Moedermelk</button>
+                <button class="segment-btn" style="color: var(--icon-blue);">Kunstmelk</button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Tijd</label>
+                <input type="datetime-local" class="input-field" id="bottleTime" style="background-color: #e6f2ff; border-color: #e6f2ff; color: var(--text-dark);">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Hoeveelheid (ml)</label>
+                <input type="number" class="input-field" id="bottleAmount" placeholder="Bijv. 150" style="background-color: #e6f2ff; border-color: #e6f2ff; color: var(--text-dark);">
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">Opmerkingen</label>
+                <textarea class="input-field" id="bottleNotes" placeholder="Bijv. spuugde een beetje terug" style="background-color: #e6f2ff; border-color: #e6f2ff; color: var(--text-dark);"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="save-btn" id="saveBottleBtn" style="background-color: var(--icon-blue); color: #fff; box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up overlay voor Kolven -->
+<div class="modal-overlay" id="pumpModal">
+    <div class="modal-container" id="pumpModalContent">
+        <div class="modal-header">
+            <button class="back-btn" id="closePumpModalBtn">&times;</button>
+            <div class="page-title" style="color: var(--icon-pink);">
+                <i class="fa-solid fa-pump-medical"></i> Kolven
+            </div>
+        </div>
+
+        <div class="modal-content">
+            <div class="input-group">
+                <label class="input-label">Starttijd</label>
+                <input type="datetime-local" class="input-field" id="pumpTime" style="background-color: #ffebe6; border-color: #ffebe6; color: var(--text-dark);">
+            </div>
+
+            <div style="display: flex; gap: 15px; margin: 20px 0;">
+                <div class="timer-section" style="flex: 1; margin: 0; padding: 15px; background-color: #fffaf9; border-radius: 16px; border: 2px solid #ffebe6;">
+                    <div style="font-size: 14px; color: var(--text-light); margin-bottom: 5px; font-weight: 500;">Links</div>
+                    <div class="timer-display" id="pumpLeftTimerDisplay" style="font-size: 32px; margin-bottom: 10px; color: var(--icon-pink);">00:00</div>
+                    <button class="sleep-action-btn" id="pumpLeftTimerBtn" style="background-color: #ffebe6; color: var(--icon-pink); width: 100%; justify-content: center; font-size: 13px;">
+                        <i class="fa-solid fa-play"></i> Start
+                    </button>
+                </div>
+
+                <div class="timer-section" style="flex: 1; margin: 0; padding: 15px; background-color: #fffaf9; border-radius: 16px; border: 2px solid #ffebe6;">
+                    <div style="font-size: 14px; color: var(--text-light); margin-bottom: 5px; font-weight: 500;">Rechts</div>
+                    <div class="timer-display" id="pumpRightTimerDisplay" style="font-size: 32px; margin-bottom: 10px; color: var(--icon-pink);">00:00</div>
+                    <button class="sleep-action-btn" id="pumpRightTimerBtn" style="background-color: #ffebe6; color: var(--icon-pink); width: 100%; justify-content: center; font-size: 13px;">
+                        <i class="fa-solid fa-play"></i> Start
+                    </button>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">Totale opbrengst (ml)</label>
+                <input type="number" class="input-field" id="pumpAmount" placeholder="Bijv. 120" style="background-color: #ffebe6; border-color: #ffebe6; color: var(--text-dark);">
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="save-btn" id="savePumpBtn" style="background-color: var(--icon-pink); color: #fff; box-shadow: 0 4px 15px rgba(255, 138, 128, 0.3);">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up overlay voor Groei (Lengte & Gewicht) -->
+<div class="modal-overlay" id="growthModal">
+    <div class="modal-container" id="growthModalContent">
+        <div class="modal-header">
+            <button class="back-btn" id="closeGrowthModalBtn">&times;</button>
+            <div class="page-title" style="color: #ff8a66;">
+                <i class="fa-solid fa-chart-line"></i> Groei & Gewicht
+            </div>
+        </div>
+
+        <div class="modal-content">
+            <div class="input-group">
+                <label class="input-label">Datum</label>
+                <input type="datetime-local" class="input-field" id="growthTime" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                    <label class="input-label">Lengte (cm)</label>
+                    <input type="number" step="0.1" class="input-field" id="growthLength" placeholder="Bijv. 55" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
+                </div>
+                <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                    <label class="input-label">Gewicht (kg)</label>
+                    <input type="number" step="0.01" class="input-field" id="growthWeight" placeholder="Bijv. 4.50" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 10px;">
+                <label class="input-label">Geschiedenis</label>
+                <div id="growthHistoryList" style="background-color: #f9f9f9; border-radius: 15px; padding: 15px; max-height: 160px; overflow-y: auto;">
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="save-btn" id="saveGrowthBtn" style="background-color: #ff8a66; color: #fff; box-shadow: 0 4px 15px rgba(255, 138, 102, 0.3);">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // ==========================================
+        // --- LOGICA VOOR INLOGGEN ---
+        // ==========================================
+        const loginScreen = document.getElementById('loginScreen');
+        const mainApp = document.getElementById('mainApp');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginUsername = document.getElementById('loginUsername');
+        const loginPassword = document.getElementById('loginPassword');
+
+        // Controleer of we in het verleden al ingelogd zijn
+        if (localStorage.getItem('babyapp_loggedin') === 'true') {
+            loginScreen.style.display = 'none';
+            mainApp.style.display = 'block';
+        }
+
+        // Actie bij klikken op "Inloggen"
+        loginBtn.addEventListener('click', () => {
+            if (loginUsername.value.trim() !== '' && loginPassword.value.trim() !== '') {
+                // Sla inlogstatus op
+                localStorage.setItem('babyapp_loggedin', 'true');
+                loginScreen.style.display = 'none';
+                mainApp.style.display = 'block';
+            } else {
+                alert('Vul alsjeblieft een gebruikersnaam en wachtwoord in.');
+            }
+        });
+
+        // ==========================================
+        // --- LOGICA VOOR LEEFTIJD BEREKENEN ---
+        // ==========================================
+        const babyAgeElement = document.getElementById('babyAge');
+        if (babyAgeElement) {
+            // Geboortedatum: 25 april 2024 (Let op: in JavaScript beginnen maanden bij 0, dus 3 = april)
+            // Pas hieronder het jaartal (2024) aan mocht dit 2023 of een ander jaartal moeten zijn!
+            const birthDate = new Date(2024, 3, 25);
+            const today = new Date();
+            
+            let ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+            if (today.getDate() < birthDate.getDate()) {
+                ageInMonths--;
+            }
+            
+            ageInMonths = Math.max(0, ageInMonths); // Voorkom negatieve getallen als de baby nog niet geboren is
+            
+            if (ageInMonths < 12) {
+                babyAgeElement.textContent = ageInMonths === 1 ? '1 maand' : `${ageInMonths} maanden`;
+            } else {
+                const years = Math.floor(ageInMonths / 12);
+                const months = ageInMonths % 12;
+                let ageText = years === 1 ? '1 jaar' : `${years} jaar`;
+                if (months > 0) {
+                    ageText += months === 1 ? ' en 1 maand' : ` en ${months} maanden`;
+                }
+                babyAgeElement.textContent = ageText;
+            }
+        }
+
+        const openSleepModalBtn = document.getElementById('openSleepModalBtn');
+        const closeSleepModalBtn = document.getElementById('closeModalBtn');
+        const sleepModal = document.getElementById('sleepModal');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // --- Zet de datum van vandaag in de tijdlijn ---
+        const todayElement = document.getElementById('todayTimelineDate');
+        if (todayElement) {
+            const today = new Date();
+            todayElement.textContent = today.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+        }
+
+        // --- LocalStorage laden ---
+        function loadTimelineItems() {
+            // Haal items op uit LocalStorage (of maak een lege lijst als er niks is)
+            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            const timeline = document.querySelector('.timeline');
+            const firstHeader = timeline.querySelector('.timeline-header');
+            
+            if (firstHeader) {
+                savedItems.forEach(item => {
+                    const newItem = document.createElement('div');
+                    newItem.className = 'timeline-item';
+                    newItem.innerHTML = `
+                        <div class="item-icon-wrapper ${item.colorClass}" style="${item.bgStyle}"><i class="fa-solid ${item.icon}"></i></div>
+                        <div class="item-details">
+                            <span class="item-title">${item.title}</span>
+                            <span class="item-subtitle">${item.subtitle}</span>
+                        </div>
+                    `;
+                    firstHeader.insertAdjacentElement('afterend', newItem);
+                });
+            }
+        }
+        
+        // Laad opgeslagen items direct bij het openen van de app
+        loadTimelineItems();
+
+        // --- Functie om huidige datum en tijd op te halen ---
+        function getCurrentDateTime() {
+            const nu = new Date();
+            nu.setMinutes(nu.getMinutes() - nu.getTimezoneOffset()); // Corrigeer voor tijdzone
+            return nu.toISOString().slice(0, 16); // Formatteer naar YYYY-MM-DDTHH:mm
+        }
+
+        // --- Functie om tijd altijd strak als 24-uurs (HH:MM) te formatteren ---
+        function format24Hour(dateObj) {
+            return String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+        }
+
+        // --- Functie om de "Lang geleden" teksten bij te werken ---
+        function updateActionTimes() {
+            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            
+            let lastSleep = null;
+            let lastBreast = null;
+            let lastDiaper = null;
+            let lastBottle = null;
+            let lastPump = null;
+
+            // Zoek achterstevoren (zodat we de meest recente pakken)
+            for (let i = savedItems.length - 1; i >= 0; i--) {
+                const item = savedItems[i];
+                if (!item.timestamp) continue; 
+                
+                if (!lastSleep && item.title.includes('Slaap')) lastSleep = item.timestamp;
+                if (!lastBreast && item.title.includes('Borstvoeding')) lastBreast = item.timestamp;
+                if (!lastDiaper && item.title.includes('luier')) lastDiaper = item.timestamp;
+                if (!lastBottle && item.title.includes('Fles')) lastBottle = item.timestamp;
+                if (!lastPump && item.title.includes('Kolven')) lastPump = item.timestamp;
+                
+                if (lastSleep && lastBreast && lastDiaper && lastBottle && lastPump) break;
+            }
+
+            function formatTimeAgo(ts) {
+                if (!ts) return 'Lang geleden';
+                const diffMs = Date.now() - new Date(ts).getTime();
+                if (diffMs < 0) return 'Zojuist';
+                
+                const diffMins = Math.floor(diffMs / 60000);
+                if (diffMins < 1) return 'Zojuist';
+                if (diffMins < 60) return `${diffMins} min geleden`;
+                
+                const hours = Math.floor(diffMins / 60);
+                const mins = diffMins % 60;
+                if (hours < 24) {
+                    return mins === 0 ? `${hours} uur geleden` : `${hours} uur en ${mins} min geleden`;
+                }
+                
+                const days = Math.floor(hours / 24);
+                return days === 1 ? '1 dag geleden' : `${days} dagen geleden`;
+            }
+
+            document.getElementById('sleepLastTime').textContent = formatTimeAgo(lastSleep);
+            document.getElementById('breastLastTime').textContent = formatTimeAgo(lastBreast);
+            document.getElementById('diaperLastTime').textContent = formatTimeAgo(lastDiaper);
+            document.getElementById('bottleLastTime').textContent = formatTimeAgo(lastBottle);
+            document.getElementById('pumpLastTime').textContent = formatTimeAgo(lastPump);
+        }
+
+        // --- Timer Logica ---
+        let timerInterval;
+        let timerSeconds = 0;
+        let isTimerRunning = false;
+        const timerDisplay = document.querySelector('.timer-display');
+        const timerBtn = document.querySelector('.sleep-action-btn');
+
+        function updateTimerDisplay() {
+            const h = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
+            const s = String(timerSeconds % 60).padStart(2, '0');
+            timerDisplay.textContent = `${h}:${m}:${s}`;
+        }
+
+        timerBtn.addEventListener('click', () => {
+            if (isTimerRunning) {
+                // Pauzeer de timer
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                timerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Hervat timer';
+            } else {
+                // Start de timer
+                isTimerRunning = true;
+                timerBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Wakker geworden';
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        });
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = 0;
+            updateTimerDisplay();
+            timerBtn.innerHTML = '<i class="fa-solid fa-stopwatch"></i> In slaap gevallen';
+        }
+
+        // --- Overige Dashboard Knoppen (Placeholder) ---
+        // Geeft een pop-up melding bij plusjes totdat we die schermen hebben gemaakte functionaliteit wordt later toegevoegd!')));
+
+        // Open Pop-up
+        openSleepModalBtn.addEventListener('click', () => {
+            sleepModal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Voorkomt dat het dashboard erachter doorscrollt
+            
+            // Vul de start- en eindtijd in, behalve als de timer al loopt of gelopen heeft
+            if (!isTimerRunning && timerSeconds === 0) {
+                document.getElementById('sleepStart').value = getCurrentDateTime();
+                document.getElementById('sleepEnd').value = getCurrentDateTime();
+            }
+        });
+
+        // Sluit Pop-up
+        const closeModal = () => {
+            sleepModal.classList.remove('active');
+            document.body.style.overflow = ''; // Zet scrollen weer aan
+        };
+
+        closeSleepModalBtn.addEventListener('click', closeModal);
+        
+        // --- Logica voor Opslaan ---
+        saveBtn.addEventListener('click', () => {
+            // Haal de slaapduur op uit de timer
+            const durationText = timerDisplay.textContent;
+            
+            const sleepTitle = 'Slapen';
+            
+            // Haal de tijd op uit de invoervelden om in het overzicht te zetten
+            const sleepEndVal = document.getElementById('sleepEnd').value;
+            const timeObj = sleepEndVal ? new Date(sleepEndVal) : new Date();
+            const timeString = format24Hour(timeObj);
+            
+            // Bepaal de tekst voor de subtitel
+            let subtitleText = `${timeString}`;
+            if (timerSeconds > 0) {
+                subtitleText += `, ${durationText} geslapen`;
+            } else {
+                subtitleText += `, handmatig ingevoerd`;
+            }
+
+            const itemTimestamp = sleepEndVal ? new Date(sleepEndVal).toISOString() : new Date().toISOString();
+
+            // Data object maken voor LocalStorage
+            const itemData = {
+                title: sleepTitle,
+                subtitle: subtitleText,
+                icon: 'fa-bed',
+                colorClass: 'c-purple',
+                bgStyle: 'background-color: #f1e6f7;',
+                timestamp: itemTimestamp
+            };
+            // Voeg toe aan bestaande items en sla op
+            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            savedItems.push(itemData);
+            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
+
+            // Maak een nieuw HTML element voor de tijdlijn
+            const newItem = document.createElement('div');
+            newItem.className = 'timeline-item';
+            newItem.innerHTML = `
+                <div class="item-icon-wrapper c-purple" style="background-color: #f1e6f7;"><i class="fa-solid fa-bed"></i></div>
+                <div class="item-details">
+                    <span class="item-title">${sleepTitle}</span>
+                    <span class="item-subtitle">${subtitleText}</span>
+                </div>
+            `;
+            
+            // Voeg het nieuwe element toe bovenaan de tijdlijn (onder de eerste datum header)
+            const timeline = document.querySelector('.timeline');
+            const firstHeader = timeline.querySelector('.timeline-header');
+            if (firstHeader) {
+                firstHeader.insertAdjacentElement('afterend', newItem);
+            }
+            
+            // Reset de timer nu we succesvol hebben opgeslagen
+            resetTimer();
+            updateActionTimes(); // Tijd updaten in startscherm
+            // Sluit het scherm
+            closeModal();
+        });
+
+        // Sluit pop-up als je op de donkere achtergrond klikt
+        sleepModal.addEventListener('click', (e) => {
+            if (e.target === sleepModal) {
+                closeModal();
+            }
+        });
+
+        // ==========================================
+        // --- LOGICA VOOR VERSCHONEN POP-UP ---
+        // ==========================================
+        const openDiaperModalBtn = document.getElementById('openDiaperModalBtn');
+        const closeDiaperModalBtn = document.getElementById('closeDiaperModalBtn');
+        const diaperModal = document.getElementById('diaperModal');
+        const saveDiaperBtn = document.getElementById('saveDiaperBtn');
+
+        // Segmented Control (Plas / Poep / Beide)
+        const diaperSegments = document.querySelectorAll('#diaperTypeControl .segment-btn');
+        diaperSegments.forEach(btn => {
+            btn.addEventListener('click', () => {
+                diaperSegments.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Open Verschonen Pop-up
+        openDiaperModalBtn.addEventListener('click', () => {
+            diaperModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('diaperTime').value = getCurrentDateTime();
+        });
+
+        // Sluit Verschonen Pop-up
+        const closeDiaperModal = () => {
+            diaperModal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        closeDiaperModalBtn.addEventListener('click', closeDiaperModal);
+        diaperModal.addEventListener('click', (e) => {
+            if (e.target === diaperModal) closeDiaperModal();
+        });
+
+        // Opslaan Verschonen
+        saveDiaperBtn.addEventListener('click', () => {
+            const activeTab = document.querySelector('#diaperTypeControl .segment-btn.active').textContent.trim();
+            const timeVal = document.getElementById('diaperTime').value;
+            
+            // Tijd formatteren
+            const timeObj = new Date(timeVal);
+            const timeString = format24Hour(timeObj);
+
+            // Titel bepalen obv selectie
+            let diaperTitle = 'Luier';
+            if (activeTab === 'Plas') diaperTitle = 'Plasluier';
+            else if (activeTab === 'Poep') diaperTitle = 'Poepluier';
+            else if (activeTab === 'Beide') diaperTitle = 'Gemengde luier';
+            const subtitleText = `${timeString}, ${activeTab}`;
+            
+            // Icoon dynamisch bepalen afhankelijk van het type luier
+            let diaperIcon = 'fa-baby';
+            if (activeTab === 'Plas') diaperIcon = 'fa-droplet';
+            if (activeTab === 'Poep' || activeTab === 'Beide') diaperIcon = 'fa-poop';
+
+            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+
+            const itemData = {
+                title: diaperTitle,
+                subtitle: subtitleText,
+                icon: diaperIcon,
+                colorClass: 'c-yellow',
+                bgStyle: 'background-color: #fcefd0;',
+                timestamp: itemTimestamp
+            };
+
+            // Opslaan in LocalStorage
+            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            savedItems.push(itemData);
+            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
+
+            // Toevoegen aan de HTML
+            const newItem = document.createElement('div');
+            newItem.className = 'timeline-item';
+            newItem.innerHTML = `
+                <div class="item-icon-wrapper ${itemData.colorClass}" style="${itemData.bgStyle}"><i class="fa-solid ${itemData.icon}"></i></div>
+                <div class="item-details">
+                    <span class="item-title">${itemData.title}</span>
+                    <span class="item-subtitle">${itemData.subtitle}</span>
+                </div>
+            `;
+            const timeline = document.querySelector('.timeline');
+            const firstHeader = timeline.querySelector('.timeline-header');
+            if (firstHeader) firstHeader.insertAdjacentElement('afterend', newItem);
+
+            updateActionTimes(); // Tijd updaten in startscherm
+            closeDiaperModal();
+        });
+
+        // ==========================================
+        // --- LOGICA VOOR BORSTVOEDING POP-UP ---
+        // ==========================================
+        const openBreastModalBtn = document.getElementById('openBreastModalBtn');
+        const closeBreastModalBtn = document.getElementById('closeBreastModalBtn');
+        const breastModal = document.getElementById('breastModal');
+        const saveBreastBtn = document.getElementById('saveBreastBtn');
+
+        let leftInterval, rightInterval;
+        let leftSeconds = 0, rightSeconds = 0;
+        let isLeftRunning = false, isRightRunning = false;
+
+        function formatBreastTime(sec) {
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(sec % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // Linker Timer
+        const leftTimerBtn = document.getElementById('leftTimerBtn');
+        leftTimerBtn.addEventListener('click', () => {
+            if (isLeftRunning) {
+                clearInterval(leftInterval);
+                isLeftRunning = false;
+                leftTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Hervat';
+            } else {
+                isLeftRunning = true;
+                leftTimerBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pauze';
+                leftInterval = setInterval(() => {
+                    leftSeconds++;
+                    document.getElementById('leftTimerDisplay').textContent = formatBreastTime(leftSeconds);
+                }, 1000);
+            }
+        });
+
+        // Rechter Timer
+        const rightTimerBtn = document.getElementById('rightTimerBtn');
+        rightTimerBtn.addEventListener('click', () => {
+            if (isRightRunning) {
+                clearInterval(rightInterval);
+                isRightRunning = false;
+                rightTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Hervat';
+            } else {
+                isRightRunning = true;
+                rightTimerBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pauze';
+                rightInterval = setInterval(() => {
+                    rightSeconds++;
+                    document.getElementById('rightTimerDisplay').textContent = formatBreastTime(rightSeconds);
+                }, 1000);
+            }
+        });
+
+        // Open Borst Pop-up
+        openBreastModalBtn.addEventListener('click', () => {
+            breastModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (!isLeftRunning && !isRightRunning && leftSeconds === 0 && rightSeconds === 0) {
+                document.getElementById('breastTime').value = getCurrentDateTime();
+            }
+        });
+
+        // Sluit Borst Pop-up
+        const closeBreastModal = () => {
+            breastModal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        const resetBreastTimers = () => {
+            clearInterval(leftInterval); clearInterval(rightInterval);
+            isLeftRunning = false; isRightRunning = false;
+            leftSeconds = 0; rightSeconds = 0;
+            document.getElementById('leftTimerDisplay').textContent = '00:00';
+            document.getElementById('rightTimerDisplay').textContent = '00:00';
+            leftTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start';
+            rightTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start';
+        };
+
+        closeBreastModalBtn.addEventListener('click', closeBreastModal);
+        breastModal.addEventListener('click', (e) => {
+            if (e.target === breastModal) closeBreastModal();
+        });
+
+        // Opslaan Borstvoeding
+        saveBreastBtn.addEventListener('click', () => {
+            const timeVal = document.getElementById('breastTime').value;
+            const timeObj = new Date(timeVal);
+            const timeString = format24Hour(timeObj);
+
+            // Bereken de tekst voor de subtitel
+            let sideText = [];
+            if (leftSeconds > 0) sideText.push(`L: ${Math.max(1, Math.round(leftSeconds/60))}m`);
+            if (rightSeconds > 0) sideText.push(`R: ${Math.max(1, Math.round(rightSeconds/60))}m`);
+            
+            let durationText = sideText.length > 0 ? sideText.join(', ') : 'handmatig';
+            const subtitleText = `${timeString}, ${durationText}`;
+
+            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+
+            const itemData = {
+                title: 'Borstvoeding',
+                subtitle: subtitleText,
+                icon: 'fa-person-breastfeeding',
+                colorClass: 'c-green',
+                bgStyle: 'background-color: #d1f0d9;',
+                timestamp: itemTimestamp
+            };
+
+            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            savedItems.push(itemData);
+            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
+
+            loadTimelineItems();
+            loadTimelineItems();
+            loadTimelineItems();
+
+            resetBreastTimers();
+            updateActionTimes(); // Tijd updaten in startscherm
+            closeBreastModal();
+        });
+
+        // Update de teksten direct bij het laden van de pagina...
+        updateActionTimes();
+        // ...en zorg dat ze elke minuut (60000ms) gecontroleerd en ververst worden
+        setInterval(updateActionTimes, 60000);
+
+        // ==========================================
+        // --- LOGICA VOOR FLESVOEDING POP-UP ---
+        // ==========================================
+        const openBottleModalBtn = document.getElementById('openBottleModalBtn');
+        const closeBottleModalBtn = document.getElementById('closeBottleModalBtn');
+        const bottleModal = document.getElementById('bottleModal');
+        const saveBottleBtn = document.getElementById('saveBottleBtn');
+
+        // Segmented Control (Moedermelk / Kunstmelk)
+        const bottleSegments = document.querySelectorAll('#bottleTypeControl .segment-btn');
+        bottleSegments.forEach(btn => {
+            btn.addEventListener('click', () => {
+                bottleSegments.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Open Fles Pop-up
+        openBottleModalBtn.addEventListener('click', () => {
+            bottleModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('bottleTime').value = getCurrentDateTime();
+            document.getElementById('bottleAmount').value = '';
+            document.getElementById('bottleNotes').value = '';
+        });
+
+        // Sluit Fles Pop-up
+        const closeBottleModal = () => {
+            bottleModal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        closeBottleModalBtn.addEventListener('click', closeBottleModal);
+        bottleModal.addEventListener('click', (e) => { if (e.target === bottleModal) closeBottleModal(); });
+
+        // Opslaan Flesvoeding
+        saveBottleBtn.addEventListener('click', () => {
+            const activeTab = document.querySelector('#bottleTypeControl .segment-btn.active').textContent.trim();
+            const timeVal = document.getElementById('bottleTime').value;
+            const amountVal = document.getElementById('bottleAmount').value;
+            
+            const timeObj = timeVal ? new Date(timeVal) : new Date();
+            const timeString = format24Hour(timeObj);
+            
+            const amountText = amountVal ? `${amountVal} ml` : '0 ml';
+            const subtitleText = `${timeString}, ${activeTab}, ${amountText}`;
+            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+
+            const itemData = { title: 'Fles', subtitle: subtitleText, icon: 'fa-bottle-droplet', colorClass: 'c-blue', bgStyle: 'background-color: #e6f2ff;', timestamp: itemTimestamp };
+
+            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            savedItems.push(itemData);
+            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
+
+            // Tijdlijn schoon herladen met groepen
+            loadTimelineItems();
+
+            updateActionTimes();
+            closeBottleModal();
+        });
+
+        // ==========================================
+        // --- LOGICA VOOR KOLVEN POP-UP ---
+        // ==========================================
+        const openPumpModalBtn = document.getElementById('openPumpModalBtn');
+        const closePumpModalBtn = document.getElementById('closePumpModalBtn');
+        const pumpModal = document.getElementById('pumpModal');
+        const savePumpBtn = document.getElementById('savePumpBtn');
+
+        let pumpLeftInterval, pumpRightInterval;
+        let pumpLeftSeconds = 0, pumpRightSeconds = 0;
+        let isPumpLeftRunning = false, isPumpRightRunning = false;
+
+        function formatPumpTime(sec) {
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(sec % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // Linker Timer Kolven
+        const pumpLeftTimerBtn = document.getElementById('pumpLeftTimerBtn');
+        pumpLeftTimerBtn.addEventListener('click', () => {
+            if (isPumpLeftRunning) {
+                clearInterval(pumpLeftInterval);
+                isPumpLeftRunning = false;
+                pumpLeftTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Hervat';
+            } else {
+                isPumpLeftRunning = true;
+                pumpLeftTimerBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pauze';
+                pumpLeftInterval = setInterval(() => {
+                    pumpLeftSeconds++;
+                    document.getElementById('pumpLeftTimerDisplay').textContent = formatPumpTime(pumpLeftSeconds);
+                }, 1000);
+            }
+        });
+
+        // Rechter Timer Kolven
+        const pumpRightTimerBtn = document.getElementById('pumpRightTimerBtn');
+        pumpRightTimerBtn.addEventListener('click', () => {
+            if (isPumpRightRunning) {
+                clearInterval(pumpRightInterval);
+                isPumpRightRunning = false;
+                pumpRightTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Hervat';
+            } else {
+                isPumpRightRunning = true;
+                pumpRightTimerBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pauze';
+                pumpRightInterval = setInterval(() => {
+                    pumpRightSeconds++;
+                    document.getElementById('pumpRightTimerDisplay').textContent = formatPumpTime(pumpRightSeconds);
+                }, 1000);
+            }
+        });
+
+        // Open Kolven Pop-up
+        openPumpModalBtn.addEventListener('click', () => {
+            pumpModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (!isPumpLeftRunning && !isPumpRightRunning && pumpLeftSeconds === 0 && pumpRightSeconds === 0) {
+                document.getElementById('pumpTime').value = getCurrentDateTime();
+                document.getElementById('pumpAmount').value = '';
+            }
+        });
+
+        // Sluit Kolven Pop-up
+        const closePumpModal = () => {
+            pumpModal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        const resetPumpTimers = () => {
+            clearInterval(pumpLeftInterval); clearInterval(pumpRightInterval);
+            isPumpLeftRunning = false; isPumpRightRunning = false;
+            pumpLeftSeconds = 0; pumpRightSeconds = 0;
+            document.getElementById('pumpLeftTimerDisplay').textContent = '00:00';
+            document.getElementById('pumpRightTimerDisplay').textContent = '00:00';
+            pumpLeftTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start';
+            pumpRightTimerBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start';
+        };
+
+        closePumpModalBtn.addEventListener('click', closePumpModal);
+        pumpModal.addEventListener('click', (e) => { if (e.target === pumpModal) closePumpModal(); });
+
+        // Opslaan Kolven
+        savePumpBtn.addEventListener('click', () => {
+            const timeVal = document.getElementById('pumpTime').value;
+            const amountVal = document.getElementById('pumpAmount').value;
+            const timeObj = timeVal ? new Date(timeVal) : new Date();
+            const timeString = format24Hour(timeObj);
+
+            // Bereken de tekst voor de subtitel
+            let sideText = [];
+            if (pumpLeftSeconds > 0) sideText.push(`L: ${Math.max(1, Math.round(pumpLeftSeconds/60))}m`);
+            if (pumpRightSeconds > 0) sideText.push(`R: ${Math.max(1, Math.round(pumpRightSeconds/60))}m`);
+            
+            let durationText = sideText.length > 0 ? sideText.join(', ') : 'handmatig';
+            if (amountVal) durationText += `, ${amountVal} ml`;
+            
+            const subtitleText = `${timeString}, ${durationText}`;
+            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+
+            const itemData = { title: 'Kolven', subtitle: subtitleText, icon: 'fa-pump-medical', colorClass: 'c-pink', bgStyle: 'background-color: #ffebe6;', timestamp: itemTimestamp };
+
+            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            savedItems.push(itemData);
+            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
+
+            // Tijdlijn schoon herladen
+            loadTimelineItems();
+
+            resetPumpTimers();
+            updateActionTimes();
+            closePumpModal();
+        });
+
+        // ==========================================
+        // --- LOGICA VOOR GROEI (LENGTE/GEWICHT) ---
+        // ==========================================
+        const growthModal = document.getElementById('growthModal');
+        const openGrowthBtns = [document.getElementById('openGrowthModalBtn1'), document.getElementById('openGrowthModalBtn2')];
+        const closeGrowthModalBtn = document.getElementById('closeGrowthModalBtn');
+        const saveGrowthBtn = document.getElementById('saveGrowthBtn');
+        const displayLength = document.getElementById('displayLength');
+        const displayWeight = document.getElementById('displayWeight');
+        const growthHistoryList = document.getElementById('growthHistoryList');
+
+        // Haal geschiedenis op of maak standaard aan (voor de 54cm en 4.41kg die er al stonden)
+        let growthData = JSON.parse(localStorage.getItem('babyapp_growth'));
+        if (!growthData || growthData.length === 0) {
+            growthData = [{
+                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // Fictieve datum (1 week geleden)
+                length: '54',
+                weight: '4,41'
+            }];
+            localStorage.setItem('babyapp_growth', JSON.stringify(growthData));
+        }
+
+        function renderGrowthData() {
+            // Sorteer nieuwste bovenaan
+            growthData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            // Werk statistieken bovenin bij
+            let latestLength = '-- cm';
+            let latestWeight = '-- kg';
+            for (let entry of growthData) {
+                if (latestLength === '-- cm' && entry.length) latestLength = entry.length + ' cm';
+                if (latestWeight === '-- kg' && entry.weight) latestWeight = entry.weight + ' kg';
+            }
+            displayLength.textContent = latestLength;
+            displayWeight.textContent = latestWeight;
+
+            // Bouw de geschiedenis lijst op
+            growthHistoryList.innerHTML = '';
+            growthData.forEach((entry, index) => {
+                const d = new Date(entry.timestamp);
+                const dateString = d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+                let vals = [];
+                if (entry.length) vals.push(entry.length + ' cm');
+                if (entry.weight) vals.push(entry.weight + ' kg');
+
+                growthHistoryList.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; font-size: 13px;">
+                        <span style="color: var(--text-light);"><i class="fa-regular fa-calendar" style="margin-right: 4px;"></i> ${dateString}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 600; color: #ff8a66;">${vals.join(' • ')}</span>
+                            <i class="fa-solid fa-trash-can delete-growth-btn" data-index="${index}" style="color: var(--icon-pink); cursor: pointer; padding: 4px;"></i>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        renderGrowthData(); // Laad direct in
+
+        // Verwijder knop functionaliteit in geschiedenis
+        growthHistoryList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-growth-btn')) {
+                const index = e.target.getAttribute('data-index');
+                if (confirm('Weet je zeker dat je deze meting wilt verwijderen?')) {
+                    growthData.splice(index, 1);
+                    localStorage.setItem('babyapp_growth', JSON.stringify(growthData));
+                    renderGrowthData(); // Herlaad de lijst
+                }
+            }
+        });
+
+        openGrowthBtns.forEach(btn => btn.addEventListener('click', () => {
+            growthModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('growthTime').value = getCurrentDateTime();
+            document.getElementById('growthLength').value = '';
+            document.getElementById('growthWeight').value = '';
+        }));
+
+        const closeGrowthModal = () => {
+            growthModal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        closeGrowthModalBtn.addEventListener('click', closeGrowthModal);
+        growthModal.addEventListener('click', (e) => { if (e.target === growthModal) closeGrowthModal(); });
+
+        saveGrowthBtn.addEventListener('click', () => {
+            const timeVal = document.getElementById('growthTime').value;
+            const lenVal = document.getElementById('growthLength').value;
+            const wgtVal = document.getElementById('growthWeight').value;
+
+            if (!lenVal && !wgtVal) return alert('Vul op z\'n minst een lengte of gewicht in.');
+
+            growthData.push({
+                timestamp: timeVal ? new Date(timeVal).toISOString() : new Date().toISOString(),
+                length: lenVal ? lenVal.replace('.', ',') : null,
+                weight: wgtVal ? wgtVal.replace('.', ',') : null
+            });
+            localStorage.setItem('babyapp_growth', JSON.stringify(growthData));
+            
+            renderGrowthData();
+            closeGrowthModal();
+        });
+    });
+</script>
+
+</body>
+</html>
