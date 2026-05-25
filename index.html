@@ -906,6 +906,9 @@
                         snapshot.forEach((docSnap) => timelineData.push({ id: docSnap.id, ...docSnap.data() }));
                         loadTimelineItems();
                         updateActionTimes();
+                    }, (error) => {
+                        console.error("Fout bij ophalen tijdlijn:", error);
+                        if(error.code === 'permission-denied') alert("Let op: Firebase toegang geweigerd. Controleer je database regels (Rules) in de Firebase Console.");
                     });
                 }
                 if (!growthUnsubscribe) {
@@ -913,6 +916,8 @@
                         growthData = [];
                         snapshot.forEach((docSnap) => growthData.push({ id: docSnap.id, ...docSnap.data() }));
                         renderGrowthData();
+                    }, (error) => {
+                        console.error("Fout bij ophalen groeidata:", error);
                     });
                 }
             } else {
@@ -1214,13 +1219,17 @@
             
             // Opslaan in Firebase
             try {
-                // Sluit het scherm direct af voor een snelle app ervaring
+                saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
+                saveBtn.disabled = true;
+                await addDoc(collection(db, "timeline"), itemData);
                 resetTimer();
                 closeModal();
-                await addDoc(collection(db, "timeline"), itemData);
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
                 alert("Opslaan mislukt! Controleer of je bent ingelogd en of de Firebase regels kloppen.");
+            } finally {
+                saveBtn.innerHTML = "Opslaan";
+                saveBtn.disabled = false;
             }
         });
 
@@ -1308,12 +1317,16 @@
 
             // Opslaan in Firebase
             try {
-                // Sluit het scherm direct af
-                closeDiaperModal();
+                saveDiaperBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
+                saveDiaperBtn.disabled = true;
                 await addDoc(collection(db, "timeline"), itemData);
+                closeDiaperModal();
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
                 alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            } finally {
+                saveDiaperBtn.innerHTML = "Opslaan";
+                saveDiaperBtn.disabled = false;
             }
         });
 
@@ -1430,13 +1443,17 @@
             };
 
             try {
-                // Sluit het scherm direct af
+                saveBreastBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
+                saveBreastBtn.disabled = true;
+                await addDoc(collection(db, "timeline"), itemData);
                 resetBreastTimers();
                 closeBreastModal();
-                await addDoc(collection(db, "timeline"), itemData);
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
                 alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            } finally {
+                saveBreastBtn.innerHTML = "Opslaan";
+                saveBreastBtn.disabled = false;
             }
         });
 
@@ -1502,12 +1519,16 @@
             const itemData = { title: 'Fles', subtitle: subtitleText, icon: 'fa-bottle-droplet', colorClass: 'c-blue', bgStyle: 'background-color: #e6f2ff;', timestamp: itemTimestamp };
 
             try {
-                // Sluit het scherm direct af
-                closeBottleModal();
+                saveBottleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
+                saveBottleBtn.disabled = true;
                 await addDoc(collection(db, "timeline"), itemData);
+                closeBottleModal();
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
                 alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            } finally {
+                saveBottleBtn.innerHTML = "Opslaan";
+                saveBottleBtn.disabled = false;
             }
         });
 
@@ -1618,13 +1639,17 @@
             const itemData = { title: 'Kolven', subtitle: subtitleText, icon: 'fa-pump-medical', colorClass: 'c-pink', bgStyle: 'background-color: #ffebe6;', timestamp: itemTimestamp };
 
             try {
-                // Sluit het scherm direct af
+                savePumpBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
+                savePumpBtn.disabled = true;
+                await addDoc(collection(db, "timeline"), itemData);
                 resetPumpTimers();
                 closePumpModal();
-                await addDoc(collection(db, "timeline"), itemData);
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
                 alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            } finally {
+                savePumpBtn.innerHTML = "Opslaan";
+                savePumpBtn.disabled = false;
             }
         });
 
@@ -1720,16 +1745,20 @@
             }
 
             try {
-                // Sluit het scherm direct af
-                closeGrowthModal();
+                saveGrowthBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
+                saveGrowthBtn.disabled = true;
                 await addDoc(collection(db, "growth"), {
                     timestamp: timeObj.toISOString(),
                     length: lenVal ? lenVal.replace('.', ',') : null,
                     weight: wgtVal ? wgtVal.replace('.', ',') : null
                 });
+                closeGrowthModal();
             } catch (error) {
                 console.error("Fout bij opslaan:", error);
                 alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            } finally {
+                saveGrowthBtn.innerHTML = "Opslaan";
+                saveGrowthBtn.disabled = false;
             }
         });
     });
