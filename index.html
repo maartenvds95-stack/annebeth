@@ -1045,6 +1045,9 @@
                         <span class="item-title">${item.title}</span>
                         <span class="item-subtitle">${item.subtitle}</span>
                     </div>
+                    <button class="item-delete-btn" data-id="${item.id}" title="Verwijderen">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                 `;
                 timeline.appendChild(newItem);
             });
@@ -1064,6 +1067,20 @@
                     }
                 }
             }
+        });
+
+        // --- Filter Logica ---
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Styling updaten (actieve knop markeren)
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Filterwaarde ophalen en items herladen
+                currentFilter = btn.getAttribute('data-filter');
+                loadTimelineItems();
+            });
         });
 
         // --- Functie om huidige datum en tijd op te halen ---
