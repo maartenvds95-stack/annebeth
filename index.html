@@ -222,14 +222,6 @@
             color: var(--text-dark);
             flex: 1;
             text-align: center;
-            padding-left: 60px; /* Om het in het midden te forceren naast de link */
-        }
-
-        .timeline-link {
-            font-size: 14px;
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
         }
 
         .timeline-item {
@@ -284,6 +276,15 @@
             .status-bar { padding: 12px 16px; }
             .stat-circle { width: 44px; height: 44px; }
             .profile-center .stat-circle { width: 70px; height: 70px; font-size: 34px; }
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.2s;
         }
 
         /* --- Modal / Pop-up Styling --- */
@@ -504,8 +505,8 @@
 
     <div style="padding: 20px;">
         <div class="input-group">
-            <label class="input-label">Gebruikersnaam</label>
-            <input type="text" class="input-field" id="loginUsername" placeholder="Bijv. mama of papa" style="background-color: var(--card-bg); border-color: #e5e5ea;">
+            <label class="input-label">E-mailadres</label>
+            <input type="email" class="input-field" id="loginUsername" placeholder="Bijv. mama@email.nl" style="background-color: var(--card-bg); border-color: #e5e5ea;">
         </div>
 
         <div class="input-group">
@@ -522,8 +523,13 @@
 <!-- Hoofd App (Verstopt totdat je bent ingelogd) -->
 <div class="app-container" id="mainApp" style="display: none;">
     
+    <div style="display: flex; justify-content: flex-end; padding: 15px 20px 0;">
+        <button class="logout-btn" id="logoutBtn" title="Uitloggen">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+    </div>
 
-    <div class="profile-section">
+    <div class="profile-section" style="padding-top: 5px;">
         <div class="stat-item clickable" id="openGrowthModalBtn1">
             <div class="stat-circle"><i class="fa-solid fa-chart-column"></i></div>
             <div class="stat-value" id="displayLength">54 cm</div>
@@ -583,7 +589,6 @@
     <div class="timeline">
         <div class="timeline-header">
             <span class="timeline-date" id="todayTimelineDate">18 mei</span>
-            <a href="#" class="timeline-link">Dagboek &gt;</a>
         </div>
     </div>
 </div>
@@ -619,7 +624,7 @@
 
             <div class="input-group">
                 <label class="input-label">Opmerkingen</label>
-                <textarea class="input-field" placeholder="Uw opmerkingen"></textarea>
+                <textarea class="input-field" id="sleepNotes" placeholder="Uw opmerkingen"></textarea>
             </div>
         </div>
 
@@ -828,7 +833,22 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyChofc8PhMI4zIwk43Ld_R1OZMDEt_hGlU",
+        authDomain: "baby-app-19e38.firebaseapp.com",
+        projectId: "baby-app-19e38",
+        storageBucket: "baby-app-19e38.firebasestorage.app",
+        messagingSenderId: "941621613030",
+        appId: "1:941621613030:web:90ad9dd582d001860ec627",
+        measurementId: "G-HDSR373BHF"
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
         // --- Helper functies voor Nederlandse datums (gegarandeerd Nederlands) ---
         function getDutchDateLong(dateObj) {
@@ -852,6 +872,32 @@
         }
 
         // ==========================================
+        // --- FIREBASE INITIALISATIE ---
+        // ==========================================
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let timelineData = [];
+        let growthData = [];
+
+        // Realtime connectie met Firebase voor de tijdlijn
+        onSnapshot(query(collection(db, "timeline")), (snapshot) => {
+            timelineData = [];
+            snapshot.forEach((docSnap) => timelineData.push({ id: docSnap.id, ...docSnap.data() }));
+            loadTimelineItems();
+            updateActionTimes();
+        });
+
+        // Realtime connectie met Firebase voor de groei gegevens
+        onSnapshot(query(collection(db, "growth")), (snapshot) => {
+            growthData = [];
+            snapshot.forEach((docSnap) => growthData.push({ id: docSnap.id, ...docSnap.data() }));
+            renderGrowthData();
+        });
+
+        // ==========================================
         // --- LOGICA VOOR INLOGGEN ---
         // ==========================================
         const loginScreen = document.getElementById('loginScreen');
@@ -860,23 +906,48 @@
         const loginUsername = document.getElementById('loginUsername');
         const loginPassword = document.getElementById('loginPassword');
 
-        // Controleer of we in het verleden al ingelogd zijn
-        if (localStorage.getItem('babyapp_loggedin') === 'true') {
-            loginScreen.style.display = 'none';
-            mainApp.style.display = 'block';
-        }
-
-        // Actie bij klikken op "Inloggen"
-        loginBtn.addEventListener('click', () => {
-            if (loginUsername.value.trim() !== '' && loginPassword.value.trim() !== '') {
-                // Sla inlogstatus op
-                localStorage.setItem('babyapp_loggedin', 'true');
+        // Controleer realtime of de gebruiker is ingelogd via Firebase
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
                 loginScreen.style.display = 'none';
                 mainApp.style.display = 'block';
             } else {
-                alert('Vul alsjeblieft een gebruikersnaam en wachtwoord in.');
+                loginScreen.style.display = 'block';
+                mainApp.style.display = 'none';
             }
         });
+
+        // Actie bij klikken op "Inloggen"
+        loginBtn.addEventListener('click', async () => {
+            const email = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+            
+            if (email !== '' && password !== '') {
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    alert('Inloggen mislukt. Controleer je e-mailadres en wachtwoord.');
+                    console.error("Fout bij inloggen:", error);
+                }
+            } else {
+                alert('Vul alsjeblieft een e-mailadres en wachtwoord in.');
+            }
+        });
+
+        // Actie bij klikken op "Uitloggen"
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                if (confirm('Weet je zeker dat je wilt uitloggen?')) {
+                    try {
+                        await signOut(auth);
+                    } catch (error) {
+                        alert('Uitloggen mislukt.');
+                        console.error("Fout bij uitloggen:", error);
+                    }
+                }
+            });
+        }
 
         // ==========================================
         // --- LOGICA VOOR LEEFTIJD BEREKENEN ---
@@ -913,20 +984,17 @@
         const sleepModal = document.getElementById('sleepModal');
         const saveBtn = document.getElementById('saveBtn');
 
-        // --- LocalStorage laden & Tijdlijn netjes opbouwen en groeperen ---
+        // --- Tijdlijn netjes opbouwen en groeperen ---
         function loadTimelineItems() {
-            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            const savedItems = [...timelineData];
             const timeline = document.querySelector('.timeline');
             
-            // Bewaar de HTML voor de dagboek link
-            const dagboekLinkHtml = '<a href="#" class="timeline-link">Dagboek &gt;</a>';
             timeline.innerHTML = ''; 
 
             if (savedItems.length === 0) {
                 timeline.innerHTML = `
                     <div class="timeline-header">
                         <span class="timeline-date">Vandaag</span>
-                        ${dagboekLinkHtml}
                     </div>
                 `;
                 return;
@@ -945,11 +1013,7 @@
                     currentGroupDate = dateGroup;
                     const header = document.createElement('div');
                     header.className = 'timeline-header';
-                    if (index === 0) {
-                        header.innerHTML = `<span class="timeline-date">${dateGroup}</span>${dagboekLinkHtml}`;
-                    } else {
-                        header.innerHTML = `<span class="timeline-date">${dateGroup}</span><span style="flex: 1;"></span>`;
-                    }
+                    header.innerHTML = `<span class="timeline-date">${dateGroup}</span>`;
                     timeline.appendChild(header);
                 }
 
@@ -966,9 +1030,6 @@
             });
         }
         
-        // Laad opgeslagen items direct bij het openen van de app
-        loadTimelineItems();
-
         // --- Functie om huidige datum en tijd op te halen ---
         function getCurrentDateTime() {
             const nu = new Date();
@@ -983,7 +1044,9 @@
 
         // --- Functie om de "Lang geleden" teksten bij te werken ---
         function updateActionTimes() {
-            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
+            const savedItems = [...timelineData];
+            // Sorteer van oud naar nieuw zodat we achterstevoren kunnen zoeken
+            savedItems.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             
             let lastSleep = null;
             let lastBreast = null;
@@ -996,11 +1059,14 @@
                 const item = savedItems[i];
                 if (!item.timestamp) continue; 
                 
-                if (!lastSleep && item.title.includes('Slaap')) lastSleep = item.timestamp;
-                if (!lastBreast && item.title.includes('Borstvoeding')) lastBreast = item.timestamp;
-                if (!lastDiaper && item.title.includes('luier')) lastDiaper = item.timestamp;
-                if (!lastBottle && item.title.includes('Fles')) lastBottle = item.timestamp;
-                if (!lastPump && item.title.includes('Kolven')) lastPump = item.timestamp;
+                if (!item.title) continue;
+                const titleLower = item.title.toLowerCase();
+                
+                if (!lastSleep && titleLower.includes('slaap')) lastSleep = item.timestamp;
+                if (!lastBreast && titleLower.includes('borst')) lastBreast = item.timestamp;
+                if (!lastDiaper && titleLower.includes('luier')) lastDiaper = item.timestamp;
+                if (!lastBottle && titleLower.includes('fles')) lastBottle = item.timestamp;
+                if (!lastPump && titleLower.includes('kolv')) lastPump = item.timestamp;
                 
                 if (lastSleep && lastBreast && lastDiaper && lastBottle && lastPump) break;
             }
@@ -1070,8 +1136,7 @@
             timerBtn.innerHTML = '<i class="fa-solid fa-stopwatch"></i> In slaap gevallen';
         }
 
-        // --- Overige Dashboard Knoppen (Placeholder) ---
-        // Geeft een pop-up melding bij plusjes totdat we die schermen hebben gemaakte functionaliteit wordt later toegevoegd!')));
+        // --- Dashboard Knoppen (Pop-ups) ---
 
         // Open Pop-up
         openSleepModalBtn.addEventListener('click', () => {
@@ -1082,6 +1147,7 @@
             if (!isTimerRunning && timerSeconds === 0) {
                 document.getElementById('sleepStart').value = getCurrentDateTime();
                 document.getElementById('sleepEnd').value = getCurrentDateTime();
+                document.getElementById('sleepNotes').value = '';
             }
         });
 
@@ -1094,7 +1160,7 @@
         closeSleepModalBtn.addEventListener('click', closeModal);
         
         // --- Logica voor Opslaan ---
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', async () => {
             // Haal de slaapduur op uit de timer
             const durationText = timerDisplay.textContent;
             
@@ -1102,7 +1168,13 @@
             
             // Haal de tijd op uit de invoervelden om in het overzicht te zetten
             const sleepEndVal = document.getElementById('sleepEnd').value;
-            const timeObj = sleepEndVal ? new Date(sleepEndVal) : new Date();
+            const notesVal = document.getElementById('sleepNotes').value.trim();
+            
+            let timeObj = new Date();
+            if (sleepEndVal) {
+                const parsedDate = new Date(sleepEndVal);
+                if (!isNaN(parsedDate.getTime())) timeObj = parsedDate;
+            }
             const timeString = format24Hour(timeObj);
             
             // Bepaal de tekst voor de subtitel
@@ -1112,8 +1184,9 @@
             } else {
                 subtitleText += `, handmatig ingevoerd`;
             }
+            if (notesVal) subtitleText += ` - ${notesVal}`;
 
-            const itemTimestamp = sleepEndVal ? new Date(sleepEndVal).toISOString() : new Date().toISOString();
+            const itemTimestamp = timeObj.toISOString();
 
             // Data object maken voor LocalStorage
             const itemData = {
@@ -1124,16 +1197,17 @@
                 bgStyle: 'background-color: #f1e6f7;',
                 timestamp: itemTimestamp
             };
-            // Voeg toe aan bestaande items en sla op
-            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
-            savedItems.push(itemData);
-            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
-
-            loadTimelineItems(); // Update het hele schema in één keer
-            resetTimer();
-            updateActionTimes(); // Tijd updaten in startscherm
-            // Sluit het scherm
-            closeModal();
+            
+            // Opslaan in Firebase
+            try {
+                // Sluit het scherm direct af voor een snelle app ervaring
+                resetTimer();
+                closeModal();
+                await addDoc(collection(db, "timeline"), itemData);
+            } catch (error) {
+                console.error("Fout bij opslaan:", error);
+                alert("Opslaan mislukt! Controleer of je bent ingelogd en of de Firebase regels kloppen.");
+            }
         });
 
         // Sluit pop-up als je op de donkere achtergrond klikt
@@ -1165,6 +1239,7 @@
             diaperModal.classList.add('active');
             document.body.style.overflow = 'hidden';
             document.getElementById('diaperTime').value = getCurrentDateTime();
+            document.getElementById('diaperNotes').value = '';
         });
 
         // Sluit Verschonen Pop-up
@@ -1179,12 +1254,17 @@
         });
 
         // Opslaan Verschonen
-        saveDiaperBtn.addEventListener('click', () => {
+        saveDiaperBtn.addEventListener('click', async () => {
             const activeTab = document.querySelector('#diaperTypeControl .segment-btn.active').textContent.trim();
             const timeVal = document.getElementById('diaperTime').value;
+            const notesVal = document.getElementById('diaperNotes').value.trim();
             
-            // Tijd formatteren
-            const timeObj = new Date(timeVal);
+            // Veilige tijd fallback als het veld leeg is of ongeldig
+            let timeObj = new Date();
+            if (timeVal) {
+                const parsedDate = new Date(timeVal);
+                if (!isNaN(parsedDate.getTime())) timeObj = parsedDate;
+            }
             const timeString = format24Hour(timeObj);
 
             // Titel bepalen obv selectie
@@ -1192,14 +1272,16 @@
             if (activeTab === 'Plas') diaperTitle = 'Plasluier';
             else if (activeTab === 'Poep') diaperTitle = 'Poepluier';
             else if (activeTab === 'Beide') diaperTitle = 'Gemengde luier';
-            const subtitleText = `${timeString}, ${activeTab}`;
+            
+            let subtitleText = `${timeString}, ${activeTab}`;
+            if (notesVal) subtitleText += ` - ${notesVal}`;
             
             // Icoon dynamisch bepalen afhankelijk van het type luier
             let diaperIcon = 'fa-baby';
             if (activeTab === 'Plas') diaperIcon = 'fa-droplet';
             if (activeTab === 'Poep' || activeTab === 'Beide') diaperIcon = 'fa-poop';
 
-            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+            const itemTimestamp = timeObj.toISOString();
 
             const itemData = {
                 title: diaperTitle,
@@ -1210,14 +1292,15 @@
                 timestamp: itemTimestamp
             };
 
-            // Opslaan in LocalStorage
-            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
-            savedItems.push(itemData);
-            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
-
-            loadTimelineItems();
-            updateActionTimes(); // Tijd updaten in startscherm
-            closeDiaperModal();
+            // Opslaan in Firebase
+            try {
+                // Sluit het scherm direct af
+                closeDiaperModal();
+                await addDoc(collection(db, "timeline"), itemData);
+            } catch (error) {
+                console.error("Fout bij opslaan:", error);
+                alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            }
         });
 
         // ==========================================
@@ -1303,9 +1386,14 @@
         });
 
         // Opslaan Borstvoeding
-        saveBreastBtn.addEventListener('click', () => {
+        saveBreastBtn.addEventListener('click', async () => {
             const timeVal = document.getElementById('breastTime').value;
-            const timeObj = new Date(timeVal);
+            
+            let timeObj = new Date();
+            if (timeVal) {
+                const parsedDate = new Date(timeVal);
+                if (!isNaN(parsedDate.getTime())) timeObj = parsedDate;
+            }
             const timeString = format24Hour(timeObj);
 
             // Bereken de tekst voor de subtitel
@@ -1316,7 +1404,7 @@
             let durationText = sideText.length > 0 ? sideText.join(', ') : 'handmatig';
             const subtitleText = `${timeString}, ${durationText}`;
 
-            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+            const itemTimestamp = timeObj.toISOString();
 
             const itemData = {
                 title: 'Borstvoeding',
@@ -1327,20 +1415,18 @@
                 timestamp: itemTimestamp
             };
 
-            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
-            savedItems.push(itemData);
-            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
-
-            loadTimelineItems(); // 1 keer laden in plaats van 3
-
-            resetBreastTimers();
-            updateActionTimes(); // Tijd updaten in startscherm
-            closeBreastModal();
+            try {
+                // Sluit het scherm direct af
+                resetBreastTimers();
+                closeBreastModal();
+                await addDoc(collection(db, "timeline"), itemData);
+            } catch (error) {
+                console.error("Fout bij opslaan:", error);
+                alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            }
         });
 
-        // Update de teksten direct bij het laden van de pagina...
-        updateActionTimes();
-        // ...en zorg dat ze elke minuut (60000ms) gecontroleerd en ververst worden
+        // Zorg dat tijd teksten elke minuut (60000ms) gecontroleerd en ververst worden
         setInterval(updateActionTimes, 60000);
 
         // ==========================================
@@ -1379,29 +1465,36 @@
         bottleModal.addEventListener('click', (e) => { if (e.target === bottleModal) closeBottleModal(); });
 
         // Opslaan Flesvoeding
-        saveBottleBtn.addEventListener('click', () => {
+        saveBottleBtn.addEventListener('click', async () => {
             const activeTab = document.querySelector('#bottleTypeControl .segment-btn.active').textContent.trim();
             const timeVal = document.getElementById('bottleTime').value;
             const amountVal = document.getElementById('bottleAmount').value;
+            const notesVal = document.getElementById('bottleNotes').value.trim();
             
-            const timeObj = timeVal ? new Date(timeVal) : new Date();
+            let timeObj = new Date();
+            if (timeVal) {
+                const parsedDate = new Date(timeVal);
+                if (!isNaN(parsedDate.getTime())) timeObj = parsedDate;
+            }
             const timeString = format24Hour(timeObj);
             
             const amountText = amountVal ? `${amountVal} ml` : '0 ml';
-            const subtitleText = `${timeString}, ${activeTab}, ${amountText}`;
-            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+            
+            let subtitleText = `${timeString}, ${activeTab}, ${amountText}`;
+            if (notesVal) subtitleText += ` - ${notesVal}`;
+            
+            const itemTimestamp = timeObj.toISOString();
 
             const itemData = { title: 'Fles', subtitle: subtitleText, icon: 'fa-bottle-droplet', colorClass: 'c-blue', bgStyle: 'background-color: #e6f2ff;', timestamp: itemTimestamp };
 
-            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
-            savedItems.push(itemData);
-            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
-
-            // Tijdlijn schoon herladen met groepen
-            loadTimelineItems();
-
-            updateActionTimes();
-            closeBottleModal();
+            try {
+                // Sluit het scherm direct af
+                closeBottleModal();
+                await addDoc(collection(db, "timeline"), itemData);
+            } catch (error) {
+                console.error("Fout bij opslaan:", error);
+                alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            }
         });
 
         // ==========================================
@@ -1486,10 +1579,15 @@
         pumpModal.addEventListener('click', (e) => { if (e.target === pumpModal) closePumpModal(); });
 
         // Opslaan Kolven
-        savePumpBtn.addEventListener('click', () => {
+        savePumpBtn.addEventListener('click', async () => {
             const timeVal = document.getElementById('pumpTime').value;
             const amountVal = document.getElementById('pumpAmount').value;
-            const timeObj = timeVal ? new Date(timeVal) : new Date();
+            
+            let timeObj = new Date();
+            if (timeVal) {
+                const parsedDate = new Date(timeVal);
+                if (!isNaN(parsedDate.getTime())) timeObj = parsedDate;
+            }
             const timeString = format24Hour(timeObj);
 
             // Bereken de tekst voor de subtitel
@@ -1501,20 +1599,19 @@
             if (amountVal) durationText += `, ${amountVal} ml`;
             
             const subtitleText = `${timeString}, ${durationText}`;
-            const itemTimestamp = timeVal ? new Date(timeVal).toISOString() : new Date().toISOString();
+            const itemTimestamp = timeObj.toISOString();
 
             const itemData = { title: 'Kolven', subtitle: subtitleText, icon: 'fa-pump-medical', colorClass: 'c-pink', bgStyle: 'background-color: #ffebe6;', timestamp: itemTimestamp };
 
-            const savedItems = JSON.parse(localStorage.getItem('babyapp_timeline')) || [];
-            savedItems.push(itemData);
-            localStorage.setItem('babyapp_timeline', JSON.stringify(savedItems));
-
-            // Tijdlijn schoon herladen
-            loadTimelineItems();
-
-            resetPumpTimers();
-            updateActionTimes();
-            closePumpModal();
+            try {
+                // Sluit het scherm direct af
+                resetPumpTimers();
+                closePumpModal();
+                await addDoc(collection(db, "timeline"), itemData);
+            } catch (error) {
+                console.error("Fout bij opslaan:", error);
+                alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            }
         });
 
         // ==========================================
@@ -1527,17 +1624,6 @@
         const displayLength = document.getElementById('displayLength');
         const displayWeight = document.getElementById('displayWeight');
         const growthHistoryList = document.getElementById('growthHistoryList');
-
-        // Haal geschiedenis op of maak standaard aan (voor de 54cm en 4.41kg die er al stonden)
-        let growthData = JSON.parse(localStorage.getItem('babyapp_growth'));
-        if (!growthData || growthData.length === 0) {
-            growthData = [{
-                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // Fictieve datum (1 week geleden)
-                length: '54',
-                weight: '4,41'
-            }];
-            localStorage.setItem('babyapp_growth', JSON.stringify(growthData));
-        }
 
         function renderGrowthData() {
             // Sorteer nieuwste bovenaan
@@ -1573,16 +1659,19 @@
                 `;
             });
         }
-        renderGrowthData(); // Laad direct in
 
         // Verwijder knop functionaliteit in geschiedenis
-        growthHistoryList.addEventListener('click', (e) => {
+        growthHistoryList.addEventListener('click', async (e) => {
             if (e.target.classList.contains('delete-growth-btn')) {
                 const index = e.target.getAttribute('data-index');
                 if (confirm('Weet je zeker dat je deze meting wilt verwijderen?')) {
-                    growthData.splice(index, 1);
-                    localStorage.setItem('babyapp_growth', JSON.stringify(growthData));
-                    renderGrowthData(); // Herlaad de lijst
+                    const entryId = growthData[index].id;
+                    try {
+                        await deleteDoc(doc(db, "growth", entryId));
+                    } catch (error) {
+                        console.error("Fout bij verwijderen:", error);
+                        alert("Verwijderen mislukt! Controleer de database regels.");
+                    }
                 }
             }
         });
@@ -1603,22 +1692,31 @@
         closeGrowthModalBtn.addEventListener('click', closeGrowthModal);
         growthModal.addEventListener('click', (e) => { if (e.target === growthModal) closeGrowthModal(); });
 
-        saveGrowthBtn.addEventListener('click', () => {
+        saveGrowthBtn.addEventListener('click', async () => {
             const timeVal = document.getElementById('growthTime').value;
             const lenVal = document.getElementById('growthLength').value;
             const wgtVal = document.getElementById('growthWeight').value;
 
             if (!lenVal && !wgtVal) return alert('Vul op z\'n minst een lengte of gewicht in.');
 
-            growthData.push({
-                timestamp: timeVal ? new Date(timeVal).toISOString() : new Date().toISOString(),
-                length: lenVal ? lenVal.replace('.', ',') : null,
-                weight: wgtVal ? wgtVal.replace('.', ',') : null
-            });
-            localStorage.setItem('babyapp_growth', JSON.stringify(growthData));
-            
-            renderGrowthData();
-            closeGrowthModal();
+            let timeObj = new Date();
+            if (timeVal) {
+                const parsedDate = new Date(timeVal);
+                if (!isNaN(parsedDate.getTime())) timeObj = parsedDate;
+            }
+
+            try {
+                // Sluit het scherm direct af
+                closeGrowthModal();
+                await addDoc(collection(db, "growth"), {
+                    timestamp: timeObj.toISOString(),
+                    length: lenVal ? lenVal.replace('.', ',') : null,
+                    weight: wgtVal ? wgtVal.replace('.', ',') : null
+                });
+            } catch (error) {
+                console.error("Fout bij opslaan:", error);
+                alert("Opslaan mislukt! Controleer de database regels in Firebase.");
+            }
         });
     });
 </script>
