@@ -883,6 +883,7 @@
         let growthData = [];
         let timelineUnsubscribe = null;
         let growthUnsubscribe = null;
+    let currentFilter = 'all';
 
         // ==========================================
         // --- LOGICA VOOR INLOGGEN ---
@@ -1049,6 +1050,22 @@
             });
         }
         
+        // --- Verwijder functionaliteit voor tijdlijn items ---
+        document.querySelector('.timeline').addEventListener('click', async (e) => {
+            const deleteBtn = e.target.closest('.item-delete-btn');
+            if (deleteBtn) {
+                const itemId = deleteBtn.getAttribute('data-id');
+                if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
+                    try {
+                        await deleteDoc(doc(db, "timeline", itemId));
+                    } catch (error) {
+                        console.error("Fout bij verwijderen:", error);
+                        alert("Verwijderen mislukt! Controleer je verbinding en rechten.");
+                    }
+                }
+            }
+        });
+
         // --- Functie om huidige datum en tijd op te halen ---
         function getCurrentDateTime() {
             const nu = new Date();
