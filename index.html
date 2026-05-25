@@ -881,21 +881,8 @@
 
         let timelineData = [];
         let growthData = [];
-
-        // Realtime connectie met Firebase voor de tijdlijn
-        onSnapshot(query(collection(db, "timeline")), (snapshot) => {
-            timelineData = [];
-            snapshot.forEach((docSnap) => timelineData.push({ id: docSnap.id, ...docSnap.data() }));
-            loadTimelineItems();
-            updateActionTimes();
-        });
-
-        // Realtime connectie met Firebase voor de groei gegevens
-        onSnapshot(query(collection(db, "growth")), (snapshot) => {
-            growthData = [];
-            snapshot.forEach((docSnap) => growthData.push({ id: docSnap.id, ...docSnap.data() }));
-            renderGrowthData();
-        });
+        let timelineUnsubscribe = null;
+        let growthUnsubscribe = null;
 
         // ==========================================
         // --- LOGICA VOOR INLOGGEN ---
@@ -911,9 +898,36 @@
             if (user) {
                 loginScreen.style.display = 'none';
                 mainApp.style.display = 'block';
+
+                // Start realtime listeners pas nadat we zeker weten dat de gebruiker is ingelogd
+                if (!timelineUnsubscribe) {
+                    timelineUnsubscribe = onSnapshot(query(collection(db, "timeline")), (snapshot) => {
+                        timelineData = [];
+                        snapshot.forEach((docSnap) => timelineData.push({ id: docSnap.id, ...docSnap.data() }));
+                        loadTimelineItems();
+                        updateActionTimes();
+                    });
+                }
+                if (!growthUnsubscribe) {
+                    growthUnsubscribe = onSnapshot(query(collection(db, "growth")), (snapshot) => {
+                        growthData = [];
+                        snapshot.forEach((docSnap) => growthData.push({ id: docSnap.id, ...docSnap.data() }));
+                        renderGrowthData();
+                    });
+                }
             } else {
                 loginScreen.style.display = 'block';
                 mainApp.style.display = 'none';
+
+                // Stop de listeners netjes wanneer er wordt uitgelogd
+                if (timelineUnsubscribe) {
+                    timelineUnsubscribe();
+                    timelineUnsubscribe = null;
+                }
+                if (growthUnsubscribe) {
+                    growthUnsubscribe();
+                    growthUnsubscribe = null;
+                }
             }
         });
 
