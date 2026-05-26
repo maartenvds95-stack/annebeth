@@ -263,6 +263,15 @@
             margin-top: 2px;
         }
 
+        .item-added-by {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .item-delete-btn {
             margin-left: auto;
             background-color: transparent;
@@ -282,6 +291,26 @@
         .item-delete-btn:active, .item-delete-btn:hover {
             background-color: #fff0ee; /* Lichtroze achtergrond bij indrukken */
             color: var(--icon-pink);
+        }
+
+        .item-edit-btn {
+            background-color: transparent;
+            border: none;
+            color: #d1d1d6;
+            font-size: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .item-edit-btn:active, .item-edit-btn:hover {
+            background-color: #eef4ff;
+            color: var(--icon-blue);
         }
 
         /* Kleur Klassen */
@@ -546,7 +575,10 @@
 <!-- Hoofd App (Verstopt totdat je bent ingelogd) -->
 <div class="app-container" id="mainApp" style="display: none;">
     
-    <div style="display: flex; justify-content: flex-end; padding: 15px 20px 0;">
+    <div style="display: flex; justify-content: flex-end; padding: 15px 20px 0; gap: 15px;">
+        <button class="logout-btn" id="changeNameBtn" title="Naam aanpassen">
+            <i class="fa-solid fa-user-pen"></i>
+        </button>
         <button class="logout-btn" id="logoutBtn" title="Uitloggen">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </button>
@@ -573,39 +605,46 @@
     </div>
 
     <div class="action-row">
-        <div class="action-card">
+        <div class="action-card" id="openSleepModalBtn">
             <div class="action-icon c-purple"><i class="fa-solid fa-bed"></i></div>
             <div class="action-title">Slapen</div>
             <div class="action-time" id="sleepLastTime">Lang geleden</div>
-            <div class="plus-btn c-purple" id="openSleepModalBtn"><i class="fa-solid fa-plus"></i></div>
+            <div class="plus-btn c-purple"><i class="fa-solid fa-plus"></i></div>
         </div>
         
-        <div class="action-card">
+        <div class="action-card" id="openBreastModalBtn">
             <div class="action-icon c-green"><i class="fa-solid fa-person-breastfeeding"></i></div>
             <div class="action-title">Borst</div>
             <div class="action-time" id="breastLastTime">Lang geleden</div>
-            <div class="plus-btn c-green" id="openBreastModalBtn"><i class="fa-solid fa-plus"></i></div>
+            <div class="plus-btn c-green"><i class="fa-solid fa-plus"></i></div>
         </div>
 
-        <div class="action-card">
+        <div class="action-card" id="openDiaperModalBtn">
             <div class="action-icon c-yellow"><i class="fa-solid fa-baby"></i></div>
             <div class="action-title">Verschonen</div>
             <div class="action-time" id="diaperLastTime">Lang geleden</div>
-            <div class="plus-btn c-yellow" id="openDiaperModalBtn"><i class="fa-solid fa-plus"></i></div>
+            <div class="plus-btn c-yellow"><i class="fa-solid fa-plus"></i></div>
         </div>
         
-        <div class="action-card">
+        <div class="action-card" id="openBottleModalBtn">
             <div class="action-icon c-blue"><i class="fa-solid fa-bottle-droplet"></i></div>
             <div class="action-title">Fles</div>
             <div class="action-time" id="bottleLastTime">Lang geleden</div>
-            <div class="plus-btn c-blue" id="openBottleModalBtn"><i class="fa-solid fa-plus"></i></div>
+            <div class="plus-btn c-blue"><i class="fa-solid fa-plus"></i></div>
         </div>
 
-        <div class="action-card">
+        <div class="action-card" id="openPumpModalBtn">
             <div class="action-icon c-pink"><i class="fa-solid fa-pump-medical"></i></div>
             <div class="action-title">Kolven</div>
             <div class="action-time" id="pumpLastTime">Lang geleden</div>
-            <div class="plus-btn c-pink" id="openPumpModalBtn"><i class="fa-solid fa-plus"></i></div>
+            <div class="plus-btn c-pink"><i class="fa-solid fa-plus"></i></div>
+        </div>
+        
+        <div class="action-card" id="openNoteModalBtn">
+            <div class="action-icon" style="color: orange;"><i class="fa-solid fa-note-sticky"></i></div>
+            <div class="action-title">Notitie</div>
+            <div class="action-time" id="noteLastTime">Lang geleden</div>
+            <div class="plus-btn" style="color: orange;"><i class="fa-solid fa-plus"></i></div>
         </div>
     </div>
 
@@ -652,6 +691,9 @@
         </div>
 
         <div class="modal-footer">
+            <button id="deleteSleepBtn" style="display:none; width:100%; background:transparent; border:none; color:var(--icon-pink); padding:10px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-solid fa-trash-can"></i> Verwijderen
+            </button>
             <button class="save-btn" id="saveBtn">Opslaan</button>
         </div>
     </div>
@@ -686,6 +728,9 @@
         </div>
 
         <div class="modal-footer">
+            <button id="deleteDiaperBtn" style="display:none; width:100%; background:transparent; border:none; color:var(--icon-pink); padding:10px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-solid fa-trash-can"></i> Verwijderen
+            </button>
             <button class="save-btn" id="saveDiaperBtn" style="background-color: var(--icon-yellow); color: #333; box-shadow: 0 4px 15px rgba(255, 179, 64, 0.3);">Opslaan</button>
         </div>
     </div>
@@ -727,6 +772,9 @@
         </div>
 
         <div class="modal-footer">
+            <button id="deleteBreastBtn" style="display:none; width:100%; background:transparent; border:none; color:var(--icon-pink); padding:10px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-solid fa-trash-can"></i> Verwijderen
+            </button>
             <button class="save-btn" id="saveBreastBtn" style="background-color: var(--icon-green); color: #fff; box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3);">Opslaan</button>
         </div>
     </div>
@@ -755,7 +803,7 @@
 
             <div class="input-group">
                 <label class="input-label">Hoeveelheid (ml)</label>
-                <input type="number" class="input-field" id="bottleAmount" placeholder="Bijv. 150" style="background-color: #e6f2ff; border-color: #e6f2ff; color: var(--text-dark);">
+                <input type="number" class="input-field" id="bottleAmount" inputmode="numeric" placeholder="Bijv. 150" style="background-color: #e6f2ff; border-color: #e6f2ff; color: var(--text-dark);">
             </div>
             
             <div class="input-group">
@@ -765,6 +813,9 @@
         </div>
 
         <div class="modal-footer">
+            <button id="deleteBottleBtn" style="display:none; width:100%; background:transparent; border:none; color:var(--icon-pink); padding:10px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-solid fa-trash-can"></i> Verwijderen
+            </button>
             <button class="save-btn" id="saveBottleBtn" style="background-color: var(--icon-blue); color: #fff; box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);">Opslaan</button>
         </div>
     </div>
@@ -806,12 +857,46 @@
             
             <div class="input-group">
                 <label class="input-label">Totale opbrengst (ml)</label>
-                <input type="number" class="input-field" id="pumpAmount" placeholder="Bijv. 120" style="background-color: #ffebe6; border-color: #ffebe6; color: var(--text-dark);">
+                <input type="number" class="input-field" id="pumpAmount" inputmode="numeric" placeholder="Bijv. 120" style="background-color: #ffebe6; border-color: #ffebe6; color: var(--text-dark);">
             </div>
         </div>
 
         <div class="modal-footer">
+            <button id="deletePumpBtn" style="display:none; width:100%; background:transparent; border:none; color:var(--icon-pink); padding:10px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-solid fa-trash-can"></i> Verwijderen
+            </button>
             <button class="save-btn" id="savePumpBtn" style="background-color: var(--icon-pink); color: #fff; box-shadow: 0 4px 15px rgba(255, 138, 128, 0.3);">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up overlay voor Notitie -->
+<div class="modal-overlay" id="noteModal">
+    <div class="modal-container" id="noteModalContent">
+        <div class="modal-header">
+            <button class="back-btn" id="closeNoteModalBtn">&times;</button>
+            <div class="page-title" style="color: orange;">
+                <i class="fa-solid fa-note-sticky"></i> Notitie
+            </div>
+        </div>
+
+        <div class="modal-content">
+            <div class="input-group">
+                <label class="input-label">Tijd</label>
+                <input type="datetime-local" class="input-field" id="noteTime" lang="nl" style="background-color: #fff3e0; border-color: #fff3e0; color: var(--text-dark);">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Notitie</label>
+                <textarea class="input-field" id="noteText" placeholder="Jouw notitie" style="background-color: #fff3e0; border-color: #fff3e0; color: var(--text-dark);"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="deleteNoteBtn" style="display:none; width:100%; background:transparent; border:none; color:var(--icon-pink); padding:10px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:8px;">
+                <i class="fa-solid fa-trash-can"></i> Verwijderen
+            </button>
+            <button class="save-btn" id="saveNoteBtn" style="background-color: orange; color: #fff; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);">Opslaan</button>
         </div>
     </div>
 </div>
@@ -835,11 +920,11 @@
             <div style="display: flex; gap: 15px; margin-bottom: 12px;">
                 <div class="input-group" style="flex: 1; margin-bottom: 0;">
                     <label class="input-label">Lengte (cm)</label>
-                    <input type="number" step="0.1" class="input-field" id="growthLength" placeholder="Bijv. 55" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
+                    <input type="number" step="0.1" class="input-field" id="growthLength" inputmode="decimal" placeholder="Bijv. 55" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
                 </div>
                 <div class="input-group" style="flex: 1; margin-bottom: 0;">
                     <label class="input-label">Gewicht (kg)</label>
-                    <input type="number" step="0.01" class="input-field" id="growthWeight" placeholder="Bijv. 4.50" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
+                    <input type="number" step="0.01" class="input-field" id="growthWeight" inputmode="decimal" placeholder="Bijv. 4.50" style="background-color: #ffebd6; border-color: #ffebd6; color: var(--text-dark);">
                 </div>
             </div>
 
@@ -860,7 +945,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyChofc8PhMI4zIwk43Ld_R1OZMDEt_hGlU",
@@ -898,7 +983,10 @@
         // --- FIREBASE INITIALISATIE ---
         // ==========================================
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+        let analytics;
+        try {
+            analytics = getAnalytics(app);
+        } catch(e) { console.warn("Analytics is geblokkeerd door de browser, maar we gaan veilig verder."); }
         const db = getFirestore(app);
         const auth = getAuth(app);
 
@@ -906,7 +994,33 @@
         let growthData = [];
         let timelineUnsubscribe = null;
         let growthUnsubscribe = null;
-    let currentFilter = 'all';
+        let currentFilter = 'all';
+        let currentEditItem = null;
+        let currentUser = null;
+
+        // Generieke verwijder functie voor pop-up menu's
+        async function handleDeleteItem(btnElement, itemId, closeFn) {
+            if (itemId && confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
+                try {
+                    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                    btnElement.disabled = true;
+                    await deleteDoc(doc(db, "timeline", itemId));
+                    closeFn();
+                } catch (error) {
+                    console.error("Fout bij verwijderen:", error);
+                    alert("Verwijderen mislukt! Controleer je verbinding en rechten.");
+                } finally {
+                    btnElement.innerHTML = '<i class="fa-solid fa-trash-can"></i> Verwijderen';
+                    btnElement.disabled = false;
+                }
+            }
+        }
+
+        function getUserName() {
+            if (!currentUser) return 'Onbekend';
+            let name = currentUser.displayName || currentUser.email.split('@')[0];
+            return name.charAt(0).toUpperCase() + name.slice(1);
+        }
 
         // ==========================================
         // --- LOGICA VOOR INLOGGEN ---
@@ -920,6 +1034,7 @@
         // Controleer realtime of de gebruiker is ingelogd via Firebase
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                currentUser = user;
                 loginScreen.style.display = 'none';
                 mainApp.style.display = 'block';
 
@@ -945,6 +1060,7 @@
                     });
                 }
             } else {
+                currentUser = null;
                 loginScreen.style.display = 'block';
                 mainApp.style.display = 'none';
 
@@ -992,6 +1108,25 @@
             });
         }
 
+        // Actie bij klikken op "Naam aanpassen"
+        const changeNameBtn = document.getElementById('changeNameBtn');
+        if (changeNameBtn) {
+            changeNameBtn.addEventListener('click', async () => {
+                const currentName = getUserName();
+                const newName = prompt('Voer je nieuwe weergavenaam in:', currentName !== 'Onbekend' ? currentName : '');
+                
+                if (newName !== null && newName.trim() !== '') {
+                    try {
+                        await updateProfile(currentUser, { displayName: newName.trim() });
+                        alert(`Je naam is succesvol aangepast naar: ${newName.trim()}`);
+                    } catch (error) {
+                        alert('Naam aanpassen mislukt.');
+                        console.error("Fout bij naam aanpassen:", error);
+                    }
+                }
+            });
+        }
+
         // ==========================================
         // --- LOGICA VOOR LEEFTIJD BEREKENEN ---
         // ==========================================
@@ -999,7 +1134,7 @@
         if (babyAgeElement) {
             // Geboortedatum: 25 april 2024 (Let op: in JavaScript beginnen maanden bij 0, dus 3 = april)
             // Pas hieronder het jaartal (2024) aan mocht dit 2023 of een ander jaartal moeten zijn!
-            const birthDate = new Date(2024, 3, 25);
+            const birthDate = new Date(2026, 3, 25);
             const today = new Date();
             
             let ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
@@ -1029,7 +1164,17 @@
 
         // --- Tijdlijn netjes opbouwen en groeperen ---
         function loadTimelineItems() {
-            const savedItems = [...timelineData];
+            let savedItems = [...timelineData];
+
+            if (currentFilter !== 'all') {
+                savedItems = savedItems.filter(item => {
+                    if (!item.title) return false;
+                    if (currentFilter === 'luier') {
+                        return item.title.toLowerCase().includes('luier');
+                    }
+                    return item.title === currentFilter;
+                });
+            }
             const timeline = document.querySelector('.timeline');
             
             timeline.innerHTML = ''; 
@@ -1060,6 +1205,14 @@
                     timeline.appendChild(header);
                 }
 
+            let editBtnHtml = `
+                <button class="item-edit-btn" data-id="${item.id}" title="Bewerken" style="margin-right: 5px;">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+            `;
+
+                const addedByHtml = item.addedBy ? `<span class="item-added-by"><i class="fa-regular fa-user"></i> ${item.addedBy}</span>` : '';
+
                 const newItem = document.createElement('div');
                 newItem.className = 'timeline-item';
                 newItem.innerHTML = `
@@ -1067,18 +1220,24 @@
                     <div class="item-details">
                         <span class="item-title">${item.title}</span>
                         <span class="item-subtitle">${item.subtitle}</span>
+                        ${addedByHtml}
                     </div>
-                    <button class="item-delete-btn" data-id="${item.id}" title="Verwijderen">
+                <div style="margin-left: auto; display: flex;">
+                    ${editBtnHtml}
+                    <button class="item-delete-btn" data-id="${item.id}" title="Verwijderen" style="margin-left: 0;">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
+                </div>
                 `;
                 timeline.appendChild(newItem);
             });
         }
         
-        // --- Verwijder functionaliteit voor tijdlijn items ---
+        // --- Verwijder en Bewerken functionaliteit voor tijdlijn items ---
         document.querySelector('.timeline').addEventListener('click', async (e) => {
             const deleteBtn = e.target.closest('.item-delete-btn');
+            const editBtn = e.target.closest('.item-edit-btn');
+
             if (deleteBtn) {
                 const itemId = deleteBtn.getAttribute('data-id');
                 if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
@@ -1088,6 +1247,84 @@
                         console.error("Fout bij verwijderen:", error);
                         alert("Verwijderen mislukt! Controleer je verbinding en rechten.");
                     }
+                }
+            } else if (editBtn) {
+                const itemId = editBtn.getAttribute('data-id');
+                const item = timelineData.find(i => i.id === itemId);
+                if (!item) return;
+                
+                currentEditItem = item;
+                
+                const dateObj = new Date(item.timestamp);
+                dateObj.setMinutes(dateObj.getMinutes() - dateObj.getTimezoneOffset());
+                const formattedTime = dateObj.toISOString().slice(0, 16);
+                
+                const subtitle = item.subtitle || '';
+                const parts = subtitle.split(' - ');
+                const baseInfo = parts[0];
+                const notes = parts.length > 1 ? parts.slice(1).join(' - ') : '';
+                
+                if (item.title === 'Slapen') {
+                    document.getElementById('saveBtn').innerHTML = 'Bijwerken';
+                    document.getElementById('deleteSleepBtn').style.display = 'block';
+                    document.getElementById('sleepStart').value = formattedTime;
+                    document.getElementById('sleepEnd').value = formattedTime;
+                    document.getElementById('sleepNotes').value = notes;
+                    document.getElementById('sleepModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else if (item.title.includes('luier') || item.title === 'Verschonen') {
+                    document.getElementById('saveDiaperBtn').innerHTML = 'Bijwerken';
+                    document.getElementById('deleteDiaperBtn').style.display = 'block';
+                    document.getElementById('diaperTime').value = formattedTime;
+                    document.getElementById('diaperNotes').value = notes;
+                    
+                    const segments = document.querySelectorAll('#diaperTypeControl .segment-btn');
+                    segments.forEach(b => b.classList.remove('active'));
+                    if (item.title.includes('Plas')) segments[0].classList.add('active');
+                    else if (item.title.includes('Poep')) segments[1].classList.add('active');
+                    else segments[2].classList.add('active');
+                    document.getElementById('diaperModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else if (item.title === 'Borstvoeding') {
+                    document.getElementById('saveBreastBtn').innerHTML = 'Bijwerken';
+                    document.getElementById('deleteBreastBtn').style.display = 'block';
+                    document.getElementById('breastTime').value = formattedTime;
+                    if (typeof resetBreastTimers === 'function') resetBreastTimers();
+                    document.getElementById('breastModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else if (item.title === 'Fles') {
+                    document.getElementById('saveBottleBtn').innerHTML = 'Bijwerken';
+                    document.getElementById('deleteBottleBtn').style.display = 'block';
+                    document.getElementById('bottleTime').value = formattedTime;
+                    document.getElementById('bottleNotes').value = notes;
+                    const segments = document.querySelectorAll('#bottleTypeControl .segment-btn');
+                    segments.forEach(b => b.classList.remove('active'));
+                    if (baseInfo.includes('Kunstmelk')) segments[1].classList.add('active');
+                    else segments[0].classList.add('active');
+                    
+                    const match = baseInfo.match(/(\d+)\s*ml/);
+                    if (match) document.getElementById('bottleAmount').value = match[1];
+                    else document.getElementById('bottleAmount').value = '';
+                    document.getElementById('bottleModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else if (item.title === 'Kolven') {
+                    document.getElementById('savePumpBtn').innerHTML = 'Bijwerken';
+                    document.getElementById('deletePumpBtn').style.display = 'block';
+                    document.getElementById('pumpTime').value = formattedTime;
+                    if (typeof resetPumpTimers === 'function') resetPumpTimers();
+                    const match = baseInfo.match(/(\d+)\s*ml/);
+                    if (match) document.getElementById('pumpAmount').value = match[1];
+                    else document.getElementById('pumpAmount').value = '';
+                    document.getElementById('pumpModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else if (item.title === 'Notitie') {
+                    document.getElementById('saveNoteBtn').innerHTML = 'Bijwerken';
+                    document.getElementById('deleteNoteBtn').style.display = 'block';
+                    document.getElementById('noteTime').value = formattedTime;
+                    document.getElementById('noteText').value = notes === 'Geen tekst' ? '' : notes;
+                    currentEditNoteId = itemId;
+                    document.getElementById('noteModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
                 }
             }
         });
@@ -1129,6 +1366,7 @@
             let lastDiaper = null;
             let lastBottle = null;
             let lastPump = null;
+            let lastNote = null;
 
             // Zoek achterstevoren (zodat we de meest recente pakken)
             for (let i = savedItems.length - 1; i >= 0; i--) {
@@ -1143,8 +1381,9 @@
                 if (!lastDiaper && titleLower.includes('luier')) lastDiaper = item.timestamp;
                 if (!lastBottle && titleLower.includes('fles')) lastBottle = item.timestamp;
                 if (!lastPump && titleLower.includes('kolv')) lastPump = item.timestamp;
+                if (!lastNote && titleLower.includes('notitie')) lastNote = item.timestamp;
                 
-                if (lastSleep && lastBreast && lastDiaper && lastBottle && lastPump) break;
+                if (lastSleep && lastBreast && lastDiaper && lastBottle && lastPump && lastNote) break;
             }
 
             function formatTimeAgo(ts) {
@@ -1171,6 +1410,9 @@
             document.getElementById('diaperLastTime').textContent = formatTimeAgo(lastDiaper);
             document.getElementById('bottleLastTime').textContent = formatTimeAgo(lastBottle);
             document.getElementById('pumpLastTime').textContent = formatTimeAgo(lastPump);
+            
+            const noteLastEl = document.getElementById('noteLastTime');
+            if (noteLastEl) noteLastEl.textContent = formatTimeAgo(lastNote);
         }
 
         // --- Timer Logica ---
@@ -1287,7 +1529,8 @@
                 icon: 'fa-bed',
                 colorClass: 'c-purple',
                 bgStyle: 'background-color: #f1e6f7;',
-                timestamp: itemTimestamp
+                timestamp: itemTimestamp,
+                addedBy: getUserName()
             };
             
             // Opslaan in Firebase
@@ -1394,7 +1637,8 @@
                 icon: diaperIcon,
                 colorClass: 'c-yellow',
                 bgStyle: 'background-color: #fcefd0;',
-                timestamp: itemTimestamp
+                timestamp: itemTimestamp,
+                addedBy: getUserName()
             };
 
             // Opslaan in Firebase
@@ -1536,7 +1780,8 @@
                 icon: 'fa-person-breastfeeding',
                 colorClass: 'c-green',
                 bgStyle: 'background-color: #d1f0d9;',
-                timestamp: itemTimestamp
+                timestamp: itemTimestamp,
+                addedBy: getUserName()
             };
 
             try {
@@ -1622,7 +1867,15 @@
             
             const itemTimestamp = timeObj.toISOString();
 
-            const itemData = { title: 'Fles', subtitle: subtitleText, icon: 'fa-bottle-droplet', colorClass: 'c-blue', bgStyle: 'background-color: #e6f2ff;', timestamp: itemTimestamp };
+            const itemData = { 
+                title: 'Fles', 
+                subtitle: subtitleText, 
+                icon: 'fa-bottle-droplet', 
+                colorClass: 'c-blue', 
+                bgStyle: 'background-color: #e6f2ff;', 
+                timestamp: itemTimestamp, 
+                addedBy: getUserName() 
+            };
 
             try {
                 saveBottleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
@@ -1757,7 +2010,15 @@
             const subtitleText = `${timeString}, ${durationText}`;
             const itemTimestamp = timeObj.toISOString();
 
-            const itemData = { title: 'Kolven', subtitle: subtitleText, icon: 'fa-pump-medical', colorClass: 'c-pink', bgStyle: 'background-color: #ffebe6;', timestamp: itemTimestamp, addedBy: getUserName() };
+            const itemData = { 
+                title: 'Kolven', 
+                subtitle: subtitleText, 
+                icon: 'fa-pump-medical', 
+                colorClass: 'c-pink', 
+                bgStyle: 'background-color: #ffebe6;', 
+                timestamp: itemTimestamp, 
+                addedBy: getUserName() 
+            };
 
             try {
                 savePumpBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
@@ -1839,7 +2100,15 @@
             const subtitleText = `${timeString} - ${textVal || 'Geen tekst'}`;
             const itemTimestamp = timeObj.toISOString();
 
-            const itemData = { title: 'Notitie', subtitle: subtitleText, icon: 'fa-note-sticky', colorClass: 'c-orange', bgStyle: 'background-color: #fff3e0;', timestamp: itemTimestamp };
+            const itemData = { 
+                title: 'Notitie', 
+                subtitle: subtitleText, 
+                icon: 'fa-note-sticky', 
+                colorClass: 'c-orange', 
+                bgStyle: 'background-color: #fff3e0;', 
+                timestamp: itemTimestamp,
+                addedBy: getUserName() 
+            };
 
             try {
                 saveNoteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opslaan...';
@@ -1922,10 +2191,27 @@
                         alert("Verwijderen mislukt! Controleer de database regels.");
                     }
                 }
+            } else if (e.target.classList.contains('edit-growth-btn')) {
+                const index = e.target.getAttribute('data-index');
+                const entry = growthData[index];
+                currentEditGrowthId = entry.id;
+                
+                // Datum formatteren voor de input
+                const dateObj = new Date(entry.timestamp);
+                dateObj.setMinutes(dateObj.getMinutes() - dateObj.getTimezoneOffset());
+                document.getElementById('growthTime').value = dateObj.toISOString().slice(0, 16);
+                
+                // Komma terugzetten naar een punt voor het nummer-invoerveld
+                document.getElementById('growthLength').value = entry.length ? entry.length.replace(',', '.') : '';
+                document.getElementById('growthWeight').value = entry.weight ? entry.weight.replace(',', '.') : '';
+                
+                document.getElementById('saveGrowthBtn').innerHTML = 'Bijwerken';
             }
         });
 
         openGrowthBtns.forEach(btn => btn.addEventListener('click', () => {
+            currentEditGrowthId = null;
+            document.getElementById('saveGrowthBtn').innerHTML = 'Opslaan';
             growthModal.classList.add('active');
             document.body.style.overflow = 'hidden';
             document.getElementById('growthTime').value = getCurrentDateTime();
